@@ -76,4 +76,4 @@ spec-iter/
 
 ## License
 
-[License](LICENSE)
+[MIT License](LICENSE)
