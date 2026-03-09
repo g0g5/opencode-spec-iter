@@ -3,11 +3,11 @@ description: Create the implementation plan based on the spec document.
 agent: build
 ---
 
-You need to create the implementation plan based on .agent/iterations/$ARGUMENTS/spec.md.
+You need to create the implementation plan based on .speciter/iterations/$ARGUMENTS/spec.md.
 
 Follow this workflow strictly:
 
-1. Verify `.agent/iterations/$ARGUMENTS/spec.md` exists.
+1. Verify `.speciter/iterations/$ARGUMENTS/spec.md` exists.
    - If `spec.md` is not found, stop immediately and report that the plan cannot be created because the spec file is missing.
 
 2. Create the implementation plan from the spec.
@@ -16,4 +16,4 @@ Follow this workflow strictly:
    - Do not include time schedules, dates, deadlines, or milestones.
 
 3. Save the plan document.
-   - Save the plan as `.agent/iterations/$ARGUMENTS/plan.md`.
+   - Save the plan as `.speciter/iterations/$ARGUMENTS/plan.md`.

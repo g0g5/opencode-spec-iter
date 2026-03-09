@@ -1,13 +1,65 @@
 #!/usr/bin/env python3
-"""Install the Spec Agents plugin to a target directory."""
+"""Install the Spec Iter plugin to a target directory."""
 
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
 
+def create_agent_directory():
+    """Create .speciter/ directory with sub-directories in project root."""
+    speciter_dir = Path.cwd() / ".speciter"
+
+    subdirs = ["iterations"]
+
+    for subdir in subdirs:
+        full_path = speciter_dir / subdir
+        full_path.mkdir(parents=True, exist_ok=True)
+
+    # Create iters.json with empty iterations array
+    iters_file = speciter_dir / "iters.json"
+    if not iters_file.exists():
+        iters_file.write_text('{"iterations": []}')
+
+
+def init_git_repo():
+    """Try to init local git repo. If already exists, skip."""
+    project_root = Path.cwd()
+    git_dir = project_root / ".git"
+
+    if git_dir.exists():
+        return
+
+    try:
+        subprocess.run(
+            ["git", "init"],
+            cwd=project_root,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return
+
+
+# def rename_opencode_gitignore():
+#     """Rename .opencode/gitignore to .opencode/.gitignore if present."""
+#     opencode_dir = Path.cwd() / ".opencode"
+#     source = opencode_dir / "gitignore"
+#     target = opencode_dir / ".gitignore"
+
+#     if not source.exists():
+#         return
+
+#     if target.exists():
+#         return
+
+#     source.rename(target)
+
+
 def main():
-    print("Spec Agents Plugin Installer")
+    print("Spec Iter Plugin Installer")
     print("=" * 40)
 
     target_input = input("Enter target directory path: ").strip()
@@ -49,7 +101,7 @@ def main():
     shutil.copytree(src_path, dest_path)
 
     gitignore_path = target_path / ".gitignore"
-    entries_to_add = [".agent/", ".opencode/commands/", ".opencode/scripts/"]
+    entries_to_add = [".speciter/", ".opencode/commands/", ".opencode/scripts/"]
 
     existing_entries = set()
     if gitignore_path.exists():
@@ -66,6 +118,13 @@ def main():
 
     print(f"\nInstalled to: {dest_path}")
     print("Installation complete!")
+
+    # Initialize project after installation
+    print("\nInitializing project...")
+    create_agent_directory()
+    # rename_opencode_gitignore()
+    init_git_repo()
+    print("Spec Iter plugin is ready to use.")
 
 
 if __name__ == "__main__":

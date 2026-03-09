@@ -24,4 +24,4 @@ Follow this workflow strictly:
 
 3. Create the SPEC document.
    - Write a concise but actionable SPEC using the gathered answers and library research.
-   - Save it to: `.agent/iterations/<iteration-name>/spec.md`, where `<iteration-name>` is the confirmed iteration name from step 1.
+   - Save it to: `.speciter/iterations/<iteration-name>/spec.md`, where `<iteration-name>` is the confirmed iteration name from step 1.

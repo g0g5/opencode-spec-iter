@@ -12,9 +12,9 @@ Follow this workflow strictly:
    - Run `git diff`.
 
 2. Create the iteration completion report at:
-   - `.agent/iterations/$ARGUMENTS/FINISHED.md`
+   - `.speciter/iterations/$ARGUMENTS/FINISHED.md`
    - Keep it concise and implementation-focused.
 
 3. Commit all post-implementation changes.
-   - Include updated `AGENTS.md` and `.agent/iterations/$ARGUMENTS/FINISHED.md`.
+   - Include updated `AGENTS.md` and `.speciter/iterations/$ARGUMENTS/FINISHED.md`.
    - Use a concise commit message describing completion of post-implementation tasks.
