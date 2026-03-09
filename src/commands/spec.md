@@ -23,5 +23,7 @@ Follow this workflow strictly:
      - `Do web search to find out latest documentation of <library name>, about <related topics to iteration's goal>, return highly concise code examples of how to use the library with minimal prose.`
 
 3. Create the SPEC document.
+   - Run command `python ./.opencode/scripts/iter_manager.py new <interation-name>`, where `<iteration-name>` is the confirmed iteration name from step 1.
    - Write a concise but actionable SPEC using the gathered answers and library research.
-   - Save it to: `.speciter/iterations/<iteration-name>/spec.md`, where `<iteration-name>` is the confirmed iteration name from step 1.
+   - Save it to: `.speciter/iterations/<iteration-name>/SPEC.md`, 
+   - Run command `python ./.opencode/scripts/iter_manager.py 1 update spec`

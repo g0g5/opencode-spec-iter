@@ -7,9 +7,9 @@ import sys
 from pathlib import Path
 
 
-def create_agent_directory():
+def create_agent_directory(project_root: Path):
     """Create .speciter/ directory with sub-directories in project root."""
-    speciter_dir = Path.cwd() / ".speciter"
+    speciter_dir = project_root / ".speciter"
 
     subdirs = ["iterations"]
 
@@ -23,9 +23,8 @@ def create_agent_directory():
         iters_file.write_text('{"iterations": []}')
 
 
-def init_git_repo():
+def init_git_repo(project_root: Path):
     """Try to init local git repo. If already exists, skip."""
-    project_root = Path.cwd()
     git_dir = project_root / ".git"
 
     if git_dir.exists():
@@ -41,21 +40,6 @@ def init_git_repo():
         )
     except (subprocess.CalledProcessError, FileNotFoundError):
         return
-
-
-# def rename_opencode_gitignore():
-#     """Rename .opencode/gitignore to .opencode/.gitignore if present."""
-#     opencode_dir = Path.cwd() / ".opencode"
-#     source = opencode_dir / "gitignore"
-#     target = opencode_dir / ".gitignore"
-
-#     if not source.exists():
-#         return
-
-#     if target.exists():
-#         return
-
-#     source.rename(target)
 
 
 def main():
@@ -121,9 +105,8 @@ def main():
 
     # Initialize project after installation
     print("\nInitializing project...")
-    create_agent_directory()
-    # rename_opencode_gitignore()
-    init_git_repo()
+    create_agent_directory(target_path)
+    init_git_repo(target_path)
     print("Spec Iter plugin is ready to use.")
 
 
