@@ -47,6 +47,23 @@ def main():
         shutil.rmtree(dest_path)
 
     shutil.copytree(src_path, dest_path)
+
+    gitignore_path = target_path / ".gitignore"
+    entries_to_add = [".agent/", ".opencode/commands/", ".opencode/scripts/"]
+
+    existing_entries = set()
+    if gitignore_path.exists():
+        existing_entries = set(gitignore_path.read_text().splitlines())
+
+    new_entries = [e for e in entries_to_add if e not in existing_entries]
+    if new_entries:
+        with open(gitignore_path, "a") as f:
+            if existing_entries and not list(existing_entries)[-1].endswith("\n"):
+                f.write("\n")
+            for entry in new_entries:
+                f.write(f"{entry}\n")
+        print(f"Updated .gitignore with: {', '.join(new_entries)}")
+
     print(f"\nInstalled to: {dest_path}")
     print("Installation complete!")
 
