@@ -20,7 +20,7 @@ def to_kebab_case(name: str) -> str:
 class IterManager:
     """Core iteration management class for spec-driven development."""
 
-    VALID_STAGES = ["new", "spec", "plan", "execute", "post", "completed"]
+    VALID_STAGES = ["new", "specified", "planned", "executed", "completed"]
 
     def __init__(self, speciter_dir: Path = Path(".speciter")):
         self.speciter_dir = speciter_dir

@@ -46,7 +46,7 @@ Follow this workflow strictly:
 
 2. Save the plan document.
    - Save the plan as `{iteration_path}/PLAN.md`.
-   - Run command `python ./.opencode/scripts/iter_manager.py update {iter_id} plan`"""
+   - Run command `python ./.opencode/scripts/iter_manager.py update {iter_id} planned`"""
 
 
 def main():

@@ -52,7 +52,7 @@ Follow this workflow strictly:
 
 5. After all phases are complete, report what was done to the user.
 
-6. Run command `python ./.opencode/scripts/iter_manager.py update {iter_id} execute`"""
+6. Run command `python ./.opencode/scripts/iter_manager.py update {iter_id} executed`"""
 
 
 def main():

@@ -26,4 +26,4 @@ Follow this workflow strictly:
    - Run command `python ./.opencode/scripts/iter_manager.py new <interation-name>`, where `<iteration-name>` is the confirmed iteration name from step 1.
    - Write a concise but actionable SPEC using the gathered answers and library research.
    - Save it to: `.speciter/iterations/<iteration-name>/SPEC.md`, 
-   - Run command `python ./.opencode/scripts/iter_manager.py 1 update spec`
+   - Run command `python ./.opencode/scripts/iter_manager.py 1 update specified`

@@ -79,7 +79,7 @@ Git Diff (stats):
 
 3. Commit all changes, regardless created by this iteration or not.
 
-4. Run command `python ./.opencode/scripts/iter_manager.py update {iter_id} post`"""
+4. Run command `python ./.opencode/scripts/iter_manager.py update {iter_id} completed`"""
 
 
 def main():
