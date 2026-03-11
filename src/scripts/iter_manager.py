@@ -3,7 +3,6 @@
 
 import argparse
 import json
-import os
 import re
 import sys
 from datetime import datetime
@@ -185,27 +184,37 @@ def cmd_list(n: Optional[int] = None):
         print(f"{idx}. {it['name']} ({it['stage']})")
 
 
-def cmd_spec(iter_id: str):
-    """Print SPEC.md path or error."""
+def cmd_path(iter_id: str, file_type: str):
+    """Print SPEC.md/PLAN.md path or error."""
     try:
-        spec_path = _manager.get_spec_path(iter_id)
-        if Path(spec_path).exists():
-            print(spec_path)
+        if file_type == "spec":
+            target_path = _manager.get_spec_path(iter_id)
+            target_name = "SPEC.md"
         else:
-            print(f"Error: SPEC.md not found for iteration {iter_id}")
+            target_path = _manager.get_plan_path(iter_id)
+            target_name = "PLAN.md"
+
+        if Path(target_path).exists():
+            print(target_path)
+        else:
+            print(f"Error: {target_name} not found for iteration {iter_id}")
+            sys.exit(1)
     except (ValueError, FileNotFoundError) as e:
         print(f"Error: {e}")
         sys.exit(1)
 
 
-def cmd_plan(iter_id: str):
-    """Print PLAN.md path or error."""
+def cmd_status(iter_id: str):
+    """Print iteration status by ID."""
     try:
-        plan_path = _manager.get_plan_path(iter_id)
-        if Path(plan_path).exists():
-            print(plan_path)
-        else:
-            print(f"Error: PLAN.md not found for iteration {iter_id}")
+        resolved_id = _manager.resolve_iteration_id(iter_id)
+        iterations = _manager.list_iterations()
+        for it in iterations:
+            if it["name"] == resolved_id:
+                print(it["stage"])
+                return
+        print(f"Error: Iteration '{iter_id}' not found")
+        sys.exit(1)
     except (ValueError, FileNotFoundError) as e:
         print(f"Error: {e}")
         sys.exit(1)
@@ -233,17 +242,18 @@ def main():
     list_parser = subparsers.add_parser("list", help="List iterations")
     list_parser.add_argument("n", nargs="?", type=int, help="Limit to top N iterations")
 
-    # spec command (iteration id + spec)
-    spec_parser = subparsers.add_parser(
-        "spec", help="Get SPEC.md path for an iteration"
+    # path command (iteration id + spec|plan)
+    path_parser = subparsers.add_parser(
+        "path", help="Get SPEC.md or PLAN.md path for an iteration"
     )
-    spec_parser.add_argument("id", help="Iteration ID (number, 1-based)")
+    path_parser.add_argument("id", help="Iteration ID (number, 1-based)")
+    path_parser.add_argument(
+        "type", choices=["spec", "plan"], help="Path type: spec or plan"
+    )
 
-    # plan command (iteration id + plan)
-    plan_parser = subparsers.add_parser(
-        "plan", help="Get PLAN.md path for an iteration"
-    )
-    plan_parser.add_argument("id", help="Iteration ID (number, 1-based)")
+    # status command (iteration id)
+    status_parser = subparsers.add_parser("status", help="Get iteration stage by ID")
+    status_parser.add_argument("id", help="Iteration ID (number, 1-based)")
 
     # update command (iteration id + update + stage)
     update_parser = subparsers.add_parser("update", help="Update iteration stage")
@@ -258,10 +268,10 @@ def main():
         cmd_new(args.name)
     elif args.command == "list":
         cmd_list(args.n)
-    elif args.command == "spec":
-        cmd_spec(args.id)
-    elif args.command == "plan":
-        cmd_plan(args.id)
+    elif args.command == "path":
+        cmd_path(args.id, args.type)
+    elif args.command == "status":
+        cmd_status(args.id)
     elif args.command == "update":
         cmd_update(args.id, args.stage)
     else:

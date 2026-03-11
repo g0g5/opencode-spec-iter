@@ -13,16 +13,30 @@ def generate_prompt(iter_id: str) -> str:
     manager = IterManager()
 
     try:
+        resolved_id = manager.resolve_iteration_id(iter_id)
         plan_path = manager.get_plan_path(iter_id)
-        iteration_path = manager.get_iteration_path(iter_id)
+        spec_path = manager.get_spec_path(iter_id)
+        current_stage = next(
+            (
+                it["stage"]
+                for it in manager.list_iterations()
+                if it["name"] == resolved_id
+            ),
+            "unknown",
+        )
     except (ValueError, FileNotFoundError) as e:
         return f"Error: {e}"
 
     if not Path(plan_path).exists():
-        return f"PLAN.md not found at {plan_path}. Tell the user to run `/plan` to create the PLAN.md first."
+        return (
+            f"PLAN.md not found at {plan_path}. "
+            f"Check path with `python ./.opencode/scripts/iter_manager.py path {iter_id} plan`, "
+            "then tell the user to run `/plan` to create PLAN.md first."
+        )
 
     return f"""You orchestrate execution of `{plan_path}`.
 Your role is coordination and oversight only. Do not write or edit any files yourself.
+Current iteration stage: `{current_stage}` (check with `python ./.opencode/scripts/iter_manager.py status {iter_id}`).
 
 Follow this workflow strictly:
 
@@ -32,7 +46,7 @@ Follow this workflow strictly:
    - Never run multiple implementation agents in parallel; this avoids edit conflicts.
 
 3. For each delegated phase, send this exact instruction to the `@general` agent:
-   - `Read spec.md and plan.md in {iteration_path}/, complete phase <phase number>.`
+   - `Read {spec_path} and {plan_path}, complete phase <phase number>.`
 
 4. When a phase is finished, delegate the next phase to a new `@general` agent.
 

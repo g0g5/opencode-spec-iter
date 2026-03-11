@@ -13,15 +13,29 @@ def generate_prompt(iter_id: str) -> str:
     manager = IterManager()
 
     try:
+        resolved_id = manager.resolve_iteration_id(iter_id)
         spec_path = manager.get_spec_path(iter_id)
         iteration_path = manager.get_iteration_path(iter_id)
+        current_stage = next(
+            (
+                it["stage"]
+                for it in manager.list_iterations()
+                if it["name"] == resolved_id
+            ),
+            "unknown",
+        )
     except (ValueError, FileNotFoundError) as e:
         return f"Error: {e}"
 
     if not Path(spec_path).exists():
-        return "SPEC.md not found. Tell the user to run `/spec` to create the SPEC.md first."
+        return (
+            f"SPEC.md not found at {spec_path}. "
+            f"Check path with `python ./.opencode/scripts/iter_manager.py path {iter_id} spec`, "
+            "then tell the user to run `/spec` to create SPEC.md first."
+        )
 
     return f"""You need to create the implementation plan based on {spec_path}
+Current iteration stage: `{current_stage}` (check with `python ./.opencode/scripts/iter_manager.py status {iter_id}`).
 
 Follow this workflow strictly:
 
