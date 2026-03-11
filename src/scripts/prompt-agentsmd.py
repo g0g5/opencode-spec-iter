@@ -80,22 +80,22 @@ def generate_prompt():
         prompt_parts.append("")  # Empty line
 
     # Main steps
+
+    prompt_parts.append("- Inspect workspace to understand:")
+    prompt_parts.append(
+        "  - WHAT — Describe the tech stack, project structure, and purpose of each major directory/package. In monorepos, explicitly list every app and shared package with a one-line description of what it does."
+    )
+    prompt_parts.append(
+        "  - WHY — State the project's purpose and the role of each major component."
+    )
+    prompt_parts.append(
+        "  - HOW — Specify only the most universally-needed commands: how to build, run tests, run typechecks, and verify changes. Do not list every possible command—only the ones used in nearly every task."
+    )
+
     if has_agents_md:
         prompt_parts.append(
-            "- Inspect workspace, focusing on project structure changes which may conflict existing AGENTS.md"
+            "- focusing on structure/tech stack/tooling changes which may conflict existing AGENTS.md"
         )
-    else:
-        prompt_parts.append("- Inspect workspace to understand:")
-        prompt_parts.append(
-            "  - WHAT — Describe the tech stack, project structure, and purpose of each major directory/package. In monorepos, explicitly list every app and shared package with a one-line description of what it does."
-        )
-        prompt_parts.append(
-            "  - WHY — State the project's purpose and the role of each major component."
-        )
-        prompt_parts.append(
-            "  - HOW — Specify only the most universally-needed commands: how to build, run tests, run typechecks, and verify changes. Do not list every possible command—only the ones used in nearly every task."
-        )
-
     prompt_parts.append("")  # Empty line
 
     # Final generation instruction
@@ -107,9 +107,7 @@ def generate_prompt():
     prompt_parts.append("")
     prompt_parts.append("## Structure Map")
     prompt_parts.append(
-        "[Bullet list of agent-facing directories/files (exclude dot-prefixed internals)."
-    )
-    prompt_parts.append(
+        "[Bullet list of agent-facing directories/files (exclude dot-prefixed internals). "
         "In monorepos, list each app/package with one-line description.]"
     )
     prompt_parts.append("")
