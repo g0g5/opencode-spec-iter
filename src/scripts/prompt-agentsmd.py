@@ -39,7 +39,7 @@ def get_recent_commits():
 def generate_prompt():
     """Generate the complete prompt string."""
     # Configuration: extendable list of instruction files to look for
-    instruction_files = ["CLAUDE.md", "AGENTS.md", ".cursorrules"]
+    instruction_files = ["README.md", "CLAUDE.md", "AGENTS.md", ".cursorrules"]
 
     # Scan for instruction files
     found_files = find_instruction_files(instruction_files)
