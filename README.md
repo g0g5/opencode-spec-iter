@@ -58,7 +58,6 @@ spec-iter/
 │       ├── prompt-plan.py
 │       ├── prompt-exec.py
 │       └── prompt-post.py
-├── docs/               # Documentation
 └── install.py          # Installation script
 ```
 

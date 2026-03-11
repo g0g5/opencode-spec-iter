@@ -9,7 +9,6 @@ OpenCode is an open-source coding agent that operates across terminal, desktop, 
 ## Project Structure
 
 /src -> the plugin's "source code". to be installed to elsewhere as ".opencode" folder.
-/docs -> related documentation.
 
 ## Development
 
