@@ -13,17 +13,8 @@ def generate_prompt(iter_id: str) -> str:
     manager = IterManager()
 
     try:
-        resolved_id = manager.resolve_iteration_id(iter_id)
         plan_path = manager.get_plan_path(iter_id)
         spec_path = manager.get_spec_path(iter_id)
-        current_stage = next(
-            (
-                it["stage"]
-                for it in manager.list_iterations()
-                if it["name"] == resolved_id
-            ),
-            "unknown",
-        )
     except (ValueError, FileNotFoundError) as e:
         return f"Error: {e}"
 
@@ -39,7 +30,6 @@ Your role is coordination and oversight only. You are only allowed to use:
     - `task` to delegate implementation phase to agents
     - `todowrite` to create create and maintain a todo list
 Do not write or edit any files yourself.
-Current iteration stage: `{current_stage}` (check with `python ./.opencode/scripts/iter_manager.py status {iter_id}`).
 
 Follow this workflow strictly:
 

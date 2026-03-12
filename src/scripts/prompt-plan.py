@@ -13,17 +13,8 @@ def generate_prompt(iter_id: str) -> str:
     manager = IterManager()
 
     try:
-        resolved_id = manager.resolve_iteration_id(iter_id)
         spec_path = manager.get_spec_path(iter_id)
         iteration_path = manager.get_iteration_path(iter_id)
-        current_stage = next(
-            (
-                it["stage"]
-                for it in manager.list_iterations()
-                if it["name"] == resolved_id
-            ),
-            "unknown",
-        )
     except (ValueError, FileNotFoundError) as e:
         return f"Error: {e}"
 
@@ -35,7 +26,6 @@ def generate_prompt(iter_id: str) -> str:
         )
 
     return f"""You need to create the implementation plan based on {spec_path}
-Current iteration stage: `{current_stage}` (check with `python ./.opencode/scripts/iter_manager.py status {iter_id}`).
 
 Follow this workflow strictly:
 

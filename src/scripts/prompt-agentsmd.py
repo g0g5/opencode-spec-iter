@@ -94,7 +94,7 @@ def generate_prompt():
 
     if has_agents_md:
         prompt_parts.append(
-            "- focusing on structure/tech stack/tooling changes which may conflict existing AGENTS.md"
+            "  - focusing on structure/tech stack/tooling changes which may conflict existing AGENTS.md"
         )
     prompt_parts.append("")  # Empty line
 

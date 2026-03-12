@@ -41,15 +41,6 @@ def generate_prompt(iter_id: str) -> str:
 
     try:
         iteration_path = manager.get_iteration_path(iter_id)
-        resolved_id = manager.resolve_iteration_id(iter_id)
-        current_stage = next(
-            (
-                it["stage"]
-                for it in manager.list_iterations()
-                if it["name"] == resolved_id
-            ),
-            "unknown",
-        )
     except (ValueError, FileNotFoundError) as e:
         return f"Error: {e}"
 
@@ -57,7 +48,6 @@ def generate_prompt(iter_id: str) -> str:
     git_diff = get_git_diff()
 
     return f"""You execute post-implementation tasks for iteration `{iter_id}`.
-Current iteration stage: `{current_stage}` (check with `python ./.opencode/scripts/iter_manager.py status {iter_id}`).
 
 Follow this workflow strictly:
 
