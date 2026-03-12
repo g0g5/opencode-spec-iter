@@ -10,17 +10,22 @@ from pathlib import Path
 def create_agent_directory(project_root: Path):
     """Create .speciter/ directory with sub-directories in project root."""
     speciter_dir = project_root / ".speciter"
+    print(f"Ensuring agent directory exists: {speciter_dir}")
 
     subdirs = ["iterations"]
 
     for subdir in subdirs:
         full_path = speciter_dir / subdir
         full_path.mkdir(parents=True, exist_ok=True)
+        print(f"Created directory: {full_path}")
 
     # Create iters.json with empty iterations array
     iters_file = speciter_dir / "iters.json"
     if not iters_file.exists():
         iters_file.write_text('{"iterations": []}')
+        print(f"Created file: {iters_file}")
+    else:
+        print(f"File already exists: {iters_file}")
 
 
 def init_git_repo(project_root: Path):
@@ -28,6 +33,7 @@ def init_git_repo(project_root: Path):
     git_dir = project_root / ".git"
 
     if git_dir.exists():
+        print(f"Git repository already exists: {git_dir}")
         return
 
     try:
@@ -38,21 +44,36 @@ def init_git_repo(project_root: Path):
             text=True,
             check=True,
         )
+        print(f"Initialized git repository in: {project_root}")
     except (subprocess.CalledProcessError, FileNotFoundError):
+        print("Skipped git initialization.")
         return
+
+
+def get_target_directory() -> Path:
+    """Return target directory from CLI arg or interactive prompt."""
+    if len(sys.argv) > 2:
+        print("Error: Too many arguments.")
+        print(f"Usage: python {Path(__file__).name} [target_directory]")
+        sys.exit(1)
+
+    if len(sys.argv) == 2:
+        target_input = sys.argv[1].strip()
+    else:
+        target_input = input("Enter target directory path: ").strip()
+
+    if not target_input:
+        print("Error: No target directory provided.")
+        sys.exit(1)
+
+    return Path(target_input).expanduser().resolve()
 
 
 def main():
     print("Spec Iter Plugin Installer")
     print("=" * 40)
 
-    target_input = input("Enter target directory path: ").strip()
-
-    if not target_input:
-        print("Error: No target directory provided.")
-        sys.exit(1)
-
-    target_path = Path(target_input).expanduser().resolve()
+    target_path = get_target_directory()
     src_path = Path(__file__).parent / "src"
     dest_path = target_path / ".opencode"
 
