@@ -13,8 +13,11 @@ Spec Iter adds structured, spec-driven development commands to OpenCode. It brea
 git clone https://github.com/g0g5/opencode-spec-iter
 cd spec-iter
 
-# Install to your project
+# Install to your project (cli interative mode)
 python install.py
+
+# Or directly pass the path of project
+python install.py /path/to/your/project/
 ```
 
 Enter your project directory path when prompted. The installer will:
