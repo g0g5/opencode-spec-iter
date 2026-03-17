@@ -6,6 +6,52 @@ import subprocess
 import sys
 
 
+INTRO_WITH_AGENTS_MD = """You are now facing an established project with AGENTS.md. The AGENTS.md may need update. Create a TODO list and follow the workflow strictly:"""
+
+INTRO_WITHOUT_AGENTS_MD = """You are now facing an project without AGENTS.md. You need to create AGENTS.md. Create a TODO list and follow the workflow strictly:"""
+
+INSPECT_WORKSPACE_BLOCK = """- Inspect workspace to understand:
+  - WHAT — Identify the tech stack and map the project as modules (folders or single-file modules) with one-line purpose per module. In monorepos, include every app and shared package as top-level modules.
+  - WHY — State the project's purpose and the role of each major component.
+  - HOW — Specify only the most universally-needed commands: how to build, run tests, run typechecks, and verify changes. Do not list every possible command—only the ones used in nearly every task."""
+
+FOCUS_EXISTING_AGENTS_MD_LINE = "  - focusing on structure/tech stack/tooling changes which may conflict existing AGENTS.md"
+
+WRITE_AGENTS_MD_BLOCK = """- Write concise AGENTS.md following this structure:
+
+```markdown
+## Project Overview
+[One sentence: what this project does and its core stack.]
+
+## Structure Map
+[Generate a module-level tree view with one-line descriptions after `#`. Show only folders and single-file modules; do not list files inside folder modules. Exclude dot-prefixed internals. In monorepos, include each app/package as top-level modules.]
+
+Example:
+
+my-ts-service/
+├─ src/                    # Runtime application modules for the service
+│  ├─ server.ts            # Boots HTTP server and initializes app startup flow
+│  ├─ config.ts            # Loads and validates environment/app configuration
+│  ├─ auth/                # Authentication and authorization module
+│  ├─ users/               # User domain logic and related operations
+│  └─ common/              # Shared utilities, types, and cross-cutting helpers
+├─ docs/                   # Project documentation for developers and maintainers
+│  ├─ api/                 # API contracts, endpoint behavior, and examples
+│  └─ architecture/        # System design, decisions, and module boundaries
+└─ tests/                  # Automated test modules
+   ├─ unit/                # Fast tests for isolated module behavior
+   └─ integration/         # Tests for module interactions and external boundaries
+
+## Development Guide
+[Minimal workflow: how to build, test, and verify changes.]
+```
+
+**Rules:**
+- Be concise: no long prose, no unnecessary details
+- Focus on what agents need to know to be productive
+- Exclude obvious or rarely-used information"""
+
+
 def find_instruction_files(configurable_files=None):
     """Find existing agent instruction files in the project."""
     if configurable_files is None:
@@ -53,15 +99,9 @@ def generate_prompt():
 
     # Beginning of prompt
     if has_agents_md:
-        prompt_parts.append(
-            "You are now facing an established project with AGENTS.md. "
-            "The AGENTS.md may need update. Create a TODO list and follow the workflow strictly:"
-        )
+        prompt_parts.append(INTRO_WITH_AGENTS_MD)
     else:
-        prompt_parts.append(
-            "You are now facing an project without AGENTS.md. "
-            "You need to create AGENTS.md. Create a TODO list and follow the workflow strictly:"
-        )
+        prompt_parts.append(INTRO_WITHOUT_AGENTS_MD)
 
     prompt_parts.append("")  # Empty line
 
@@ -81,44 +121,14 @@ def generate_prompt():
 
     # Main steps
 
-    prompt_parts.append("- Inspect workspace to understand:")
-    prompt_parts.append(
-        "  - WHAT — Describe the tech stack, project structure, and purpose of each major directory/package. In monorepos, explicitly list every app and shared package with a one-line description of what it does."
-    )
-    prompt_parts.append(
-        "  - WHY — State the project's purpose and the role of each major component."
-    )
-    prompt_parts.append(
-        "  - HOW — Specify only the most universally-needed commands: how to build, run tests, run typechecks, and verify changes. Do not list every possible command—only the ones used in nearly every task."
-    )
+    prompt_parts.append(INSPECT_WORKSPACE_BLOCK)
 
     if has_agents_md:
-        prompt_parts.append(
-            "  - focusing on structure/tech stack/tooling changes which may conflict existing AGENTS.md"
-        )
+        prompt_parts.append(FOCUS_EXISTING_AGENTS_MD_LINE)
     prompt_parts.append("")  # Empty line
 
     # Final generation instruction
-    prompt_parts.append("- Write concise AGENTS.md following this structure:")
-    prompt_parts.append("")
-    prompt_parts.append("```markdown")
-    prompt_parts.append("## Project Overview")
-    prompt_parts.append("[One sentence: what this project does and its core stack.]")
-    prompt_parts.append("")
-    prompt_parts.append("## Structure Map")
-    prompt_parts.append(
-        "[Bullet list of agent-facing directories/files (exclude dot-prefixed internals). "
-        "In monorepos, list each app/package with one-line description.]"
-    )
-    prompt_parts.append("")
-    prompt_parts.append("## Development Guide")
-    prompt_parts.append("[Minimal workflow: how to build, test, and verify changes.]")
-    prompt_parts.append("```")
-    prompt_parts.append("")
-    prompt_parts.append("**Rules:**")
-    prompt_parts.append("- Be concise: no long prose, no unnecessary details")
-    prompt_parts.append("- Focus on what agents need to know to be productive")
-    prompt_parts.append("- Exclude obvious or rarely-used information")
+    prompt_parts.append(WRITE_AGENTS_MD_BLOCK)
 
     return "\n".join(prompt_parts)
 

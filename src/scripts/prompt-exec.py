@@ -26,16 +26,13 @@ def generate_prompt(iter_id: str) -> str:
         )
 
     return f"""You orchestrate execution of `{plan_path}`.
-Your role is coordination and oversight only. You are only allowed to use:
-    - `task` to delegate implementation phase to agents
-    - `todowrite` to create create and maintain a todo list
-Do not write or edit any files yourself.
+Your role is coordination and oversight only. Do not write or edit any files yourself.
 
 Follow this workflow strictly:
 
-1. Read `{plan_path}` to understand the implementation plan. Use `todowrite` to create and maintain a todo list for all plan phases.
+1. Read `{plan_path}` to understand the implementation plan. Create and maintain a todo list for all plan phases.
 
-2. Use `task` to delegate exactly one implementation phase at a time to one `@general` agent.
+2. Delegate exactly one implementation phase at a time to one `@general` agent.
    - Never run multiple implementation agents in parallel; this avoids edit conflicts.
 
 3. For each delegated phase, send this exact instruction to the `@general` agent:
