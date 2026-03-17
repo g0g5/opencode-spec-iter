@@ -9,14 +9,12 @@ Spec Iter adds structured, spec-driven development commands to OpenCode. It brea
 ## Installation
 
 ```bash
-# Clone the repository
+# Install directly from git repo via uvx
+uvx --from https://github.com/g0g5/opencode-spec-iter spec-iter /path/to/your/project/
+
+# Or clone and run locally
 git clone https://github.com/g0g5/opencode-spec-iter
 cd spec-iter
-
-# Install to your project (cli interative mode)
-python install.py
-
-# Or directly pass the path of project
 python install.py /path/to/your/project/
 ```
 
@@ -42,7 +40,7 @@ After installation, these commands become available in OpenCode:
 
 This is the typical end-to-end workflow after the plugin is installed into a project.
 
-**How commands become prompts**: OpenCode loads markdown templates from `src/commands/`. Placeholders like `$1`, `$2`, `$ARGUMENTS` are replaced with your command arguments. Inline shell snippets (``!`command` ``) execute and their output is inserted into the prompt. The LLM only sees the final rendered prompt, not the template.
+**How commands become prompts**: OpenCode loads markdown templates from `.opencode/commands/` (installed from this package's bundled assets). Placeholders like `$1`, `$2`, `$ARGUMENTS` are replaced with your command arguments. Inline shell snippets (``!`command` ``) execute and their output is inserted into the prompt. The LLM only sees the final rendered prompt, not the template.
 
 ### 1. Create a spec with `/spec`
 
@@ -54,7 +52,7 @@ Example:
 
 **What happens to your command**:
 
-OpenCode loads `src/commands/spec.md` and replaces `$ARGUMENTS` with your feature idea. The model receives the full template with your idea filled in.
+OpenCode loads `.opencode/commands/spec.md` and replaces `$ARGUMENTS` with your feature idea. The model receives the full template with your idea filled in.
 
 **What the model sees and does**:
 
@@ -76,7 +74,7 @@ Example:
 
 **What happens to your command**:
 
-OpenCode loads `src/commands/plan.md`, which contains ``!`python ./.opencode/scripts/prompt-plan.py $1` ``. The shell executes with `$1` = `1`, and the script's output replaces the shell snippet. The model receives only the rendered prompt from the script.
+OpenCode loads `.opencode/commands/plan.md`, which contains ``!`python ./.opencode/scripts/prompt-plan.py $1` ``. The shell executes with `$1` = `1`, and the script's output replaces the shell snippet. The model receives only the rendered prompt from the script.
 
 **What the model sees and does**:
 
@@ -103,7 +101,7 @@ Example:
 
 **What happens to your command**:
 
-OpenCode loads `src/commands/exec.md` with ``!`python ./.opencode/scripts/prompt-exec.py $1` ``. The script checks that `PLAN.md` exists, then outputs the execution prompt. The model receives only this generated prompt.
+OpenCode loads `.opencode/commands/exec.md` with ``!`python ./.opencode/scripts/prompt-exec.py $1` ``. The script checks that `PLAN.md` exists, then outputs the execution prompt. The model receives only this generated prompt.
 
 **What the model sees and does**:
 
@@ -125,7 +123,7 @@ Example:
 
 **What happens to your command**:
 
-OpenCode loads `src/commands/post.md` with ``!`python ./.opencode/scripts/prompt-post.py $1` ``. The script runs `git status --short` and `git diff --stat`, embedding the results in the generated prompt.
+OpenCode loads `.opencode/commands/post.md` with ``!`python ./.opencode/scripts/prompt-post.py $1` ``. The script runs `git status --short` and `git diff --stat`, embedding the results in the generated prompt.
 
 **What the model sees and does**:
 
@@ -145,7 +143,7 @@ Example:
 
 **What happens to your command**:
 
-OpenCode loads `src/commands/agentsmd.md` which executes ``!`python ./.opencode/scripts/prompt-agentsmd.py` ``. The script scans for context files (`README.md`, `AGENTS.md`, etc.) and recent git commits, then outputs a prompt to generate/update project context.
+OpenCode loads `.opencode/commands/agentsmd.md` which executes ``!`python ./.opencode/scripts/prompt-agentsmd.py` ``. The script scans for context files (`README.md`, `AGENTS.md`, etc.) and recent git commits, then outputs a prompt to generate/update project context.
 
 **What the model sees and does**:
 
@@ -157,12 +155,12 @@ Receives a prompt with discovered project files and conventions, then creates/up
 
 | Command | Template File | Shell Execution | Final Prompt Source |
 |---------|--------------|-----------------|---------------------|
-| `/spec <idea>` | `src/commands/spec.md` | None | Template with `$ARGUMENTS` replaced |
-| `/plan <id>` | `src/commands/plan.md` | `prompt-plan.py $1` | Script stdout |
-| `/exec <id>` | `src/commands/exec.md` | `prompt-exec.py $1` | Script stdout |
-| `/post <id>` | `src/commands/post.md` | `prompt-post.py $1` | Script stdout (includes git status) |
-| `/agentsmd` | `src/commands/agentsmd.md` | `prompt-agentsmd.py` | Script stdout |
-| `/list-iters` | `src/commands/list-iters.md` | `iter_manager.py list` | Direct script output to user |
+| `/spec <idea>` | `.opencode/commands/spec.md` | None | Template with `$ARGUMENTS` replaced |
+| `/plan <id>` | `.opencode/commands/plan.md` | `prompt-plan.py $1` | Script stdout |
+| `/exec <id>` | `.opencode/commands/exec.md` | `prompt-exec.py $1` | Script stdout |
+| `/post <id>` | `.opencode/commands/post.md` | `prompt-post.py $1` | Script stdout (includes git status) |
+| `/agentsmd` | `.opencode/commands/agentsmd.md` | `prompt-agentsmd.py` | Script stdout |
+| `/list-iters` | `.opencode/commands/list-iters.md` | `iter_manager.py list` | Direct script output to user |
 
 
 
@@ -170,19 +168,13 @@ Receives a prompt with discovered project files and conventions, then creates/up
 
 ```
 spec-iter/
-├── src/
-│   ├── commands/       # Markdown-based LLM prompts
-│   │   ├── spec.md
-│   │   ├── plan.md
-│   │   ├── exec.md
-│   │   ├── post.md
-│   │   └── agentsmd.md
-│   └── scripts/        # Python execution scripts
-│       ├── iter_manager.py
-│       ├── prompt-plan.py
-│       ├── prompt-exec.py
-│       └── prompt-post.py
-└── install.py          # Installation script
+├── spec_iter/
+│   ├── cli.py                     # Installer CLI entrypoint (`spec-iter`)
+│   └── bundled_src/
+│       ├── commands/              # Markdown-based command templates
+│       └── scripts/               # Python helper scripts for templates
+├── pyproject.toml                 # Packaging and console script config
+└── install.py                     # Backward-compatible wrapper (`python install.py`)
 ```
 
 ## Development Philosophy
@@ -194,6 +186,7 @@ spec-iter/
 ## Requirements
 
 - OpenCode CLI
+- uv (for `uvx` installation)
 - Python 3.x
 - Git
 

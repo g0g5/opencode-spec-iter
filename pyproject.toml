@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spec-iter"
+version = "0.1.0"
+description = "Spec-driven iterative development workflow plugin installer for OpenCode"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Spec Iter Contributors" }
+]
+
+[project.scripts]
+spec-iter = "spec_iter.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["spec_iter*"]
+
+[tool.setuptools.package-data]
+spec_iter = ["bundled_src/commands/*.md", "bundled_src/scripts/*.py"]

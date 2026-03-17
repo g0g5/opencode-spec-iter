@@ -61,7 +61,6 @@ class IterManager:
         data = self.load_iters()
         iterations = data.get("iterations", [])
 
-        # Parse as numeric ID
         try:
             num_id = int(iter_id)
             if num_id < 1:
@@ -70,7 +69,6 @@ class IterManager:
                 raise ValueError(
                     f"Iteration #{num_id} not found (only {len(iterations)} iterations)"
                 )
-            # Return the name of the iteration at position num_id-1 (0-indexed)
             return iterations[num_id - 1]["name"]
         except ValueError as e:
             if "Iteration" in str(e):
@@ -153,7 +151,6 @@ class IterManager:
         self.save_iters(data)
 
 
-# Global instance for cmd_* functions
 _manager = IterManager()
 
 
@@ -234,15 +231,12 @@ def main():
     parser = argparse.ArgumentParser(description="Manage spec iterations")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # new command
     new_parser = subparsers.add_parser("new", help="Create a new iteration")
     new_parser.add_argument("name", help="Iteration name")
 
-    # list command
     list_parser = subparsers.add_parser("list", help="List iterations")
     list_parser.add_argument("n", nargs="?", type=int, help="Limit to top N iterations")
 
-    # path command (iteration id + spec|plan)
     path_parser = subparsers.add_parser(
         "path", help="Get SPEC.md or PLAN.md path for an iteration"
     )
@@ -251,11 +245,9 @@ def main():
         "type", choices=["spec", "plan"], help="Path type: spec or plan"
     )
 
-    # status command (iteration id)
     status_parser = subparsers.add_parser("status", help="Get iteration stage by ID")
     status_parser.add_argument("id", help="Iteration ID (number, 1-based)")
 
-    # update command (iteration id + update + stage)
     update_parser = subparsers.add_parser("update", help="Update iteration stage")
     update_parser.add_argument("id", help="Iteration ID (number, 1-based)")
     update_parser.add_argument(
