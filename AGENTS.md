@@ -8,7 +8,18 @@ OpenCode is an open-source coding agent that operates across terminal, desktop, 
 
 ## Project Structure
 
-/src -> the plugin's "source code". to be installed to elsewhere as ".opencode" folder.
+```
+spec-iter/
+├── spec_iter/
+│   ├── cli.py                   # Installer CLI entrypoint (`spec-iter`)
+│   └── bundled_src/
+│       ├── commands/            # Markdown command templates copied to `.opencode/commands/`
+│       └── scripts/             # Python helper scripts copied to `.opencode/scripts/`
+├── pyproject.toml               # Packaging and console script config
+└── install.py                   # Backward-compatible wrapper (`python install.py`)
+```
+
+`spec_iter/bundled_src/` is the plugin source payload that gets installed into a target project's `.opencode/` folder.
 
 ## Development
 
