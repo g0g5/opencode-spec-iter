@@ -10,7 +10,7 @@ Spec Iter adds structured, spec-driven development commands to OpenCode. It brea
 
 ```bash
 # Install directly from git repo via uvx
-uvx --from https://github.com/g0g5/opencode-spec-iter spec-iter /path/to/your/project/
+uvx --from git+https://github.com/g0g5/opencode-spec-iter spec-iter /path/to/your/project/
 
 # Or clone and run locally
 git clone https://github.com/g0g5/opencode-spec-iter
