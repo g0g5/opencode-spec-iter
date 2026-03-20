@@ -1,31 +1,33 @@
 # Spec Iter
 
-Spec Iter is a OpenCode project-level plugin that contains LLM agent commands for spec-driven iterative development workflow.
+## Project Overview
 
-## What is OpenCode
+Spec Iter is a Python companion CLI for OpenCode that installs bundled slash-command templates into projects and manages a spec-driven iteration workflow under `.speciter/`.
 
-OpenCode is an open-source coding agent that operates across terminal, desktop, and IDE environments with configurable sub-agents and multi-provider LLM support. A coding agent product is a host runtime for an LLM-based programmer: a managed environment that supplies the model with workspace access, tools, memory/state, guardrails, and orchestration, so the model can perform multi-step engineering work instead of only answering prompts.
+## Structure Map
 
-## Project Structure
-
-```
+```text
 spec-iter/
-├── spec_iter/
-│   ├── cli.py                   # Installer CLI entrypoint (`spec-iter`)
-│   └── bundled_src/
-│       ├── commands/            # Markdown command templates copied to `.opencode/commands/`
-│       └── scripts/             # Python helper scripts copied to `.opencode/scripts/`
-├── pyproject.toml               # Packaging and console script config
-└── install.py                   # Backward-compatible wrapper (`python install.py`)
+|- spec_iter/                  # Runtime package for the installed `spec-iter` CLI
+|  |- cli.py                   # argparse entrypoint and command dispatch
+|  |- init.py                  # Project initialization, managed command install, legacy cleanup
+|  |- iterations.py            # Iteration metadata, id resolution, stage updates, path helpers
+|  |- project.py               # Upward project-root discovery and display-path helpers
+|  |- prompts.py               # Prompt generation for plan, exec, post, and agentsmd flows
+|  \- bundled_src/
+|     \- commands/            # Markdown templates copied into `.opencode/commands/`
+|- docs/                       # Design notes and implementation planning docs
+|- pyproject.toml              # Packaging metadata and console script entrypoint
+|- README.md                   # User-facing install and workflow documentation
+|- AGENTS.md                   # Project guidance for coding agents
+|- install.py                  # Backward-compatible wrapper for `spec-iter init`
+\- clify.spec.md              # Current CLI companion refactor spec
 ```
 
-`spec_iter/bundled_src/` is the plugin source payload that gets installed into a target project's `.opencode/` folder.
+## Development Guide
 
-## Development
-
-- Markdown-based LLM prompting + minimal Python scripting.
-- OpenCode loads markdown files in `src/commands/` as prompt templates.
-- When a user runs a command such as `/command params`, OpenCode fills `$` placeholders in the template with the command arguments, similar to f-string interpolation.
-- If the template contains inline shell snippets like ``!`shell command` ``, OpenCode executes them while building the prompt.
-- The model API receives only the fully rendered final prompt, not the original command template or inline shell commands.
-- Keep everything (prompts, scripts) concise and minimalist, avoid long prose.
+- Primary workflow: update package code in `spec_iter/` and bundled command templates in `spec_iter/bundled_src/commands/` together.
+- Installation model: prefer `uv tool install .` for local validation; end-user workflow is `spec-iter init`, then `spec-iter ...` inside initialized projects.
+- Verification: run `python -m compileall spec_iter` after Python changes; manually validate `spec-iter init`, `spec-iter new`, `spec-iter list`, `spec-iter update`, and `spec-iter prompt ...` in a temp project when behavior changes.
+- Prompt templates: keep markdown concise; OpenCode expands `$` placeholders and executes inline shell snippets before sending the final prompt to the model.
+- Scope: managed runtime behavior now lives in package modules, not copied `.opencode/scripts/` helpers; preserve backward-compatible init migration behavior when changing project setup.
