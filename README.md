@@ -1,193 +1,108 @@
 # Spec Iter
 
-Spec-driven iterative development workflow plugin for [OpenCode](https://opencode.ai).
+Spec-driven iterative development companion CLI for [OpenCode](https://opencode.ai).
 
 ## Overview
 
-Spec Iter adds structured, spec-driven development commands to OpenCode. It breaks down complex features into manageable iterations with clear specifications, implementation plans, and execution tracking.
+Spec Iter installs once as a Python CLI, then runs directly inside any initialized project. It manages iteration state under `.speciter/` and installs bundled OpenCode command templates under `.opencode/commands/`.
 
 ## Installation
 
 ```bash
-# Install directly from git repo via uvx
-uvx --from git+https://github.com/g0g5/opencode-spec-iter spec-iter /path/to/your/project/
+uv tool install spec-iter --from git+https://github.com/g0g5/opencode-spec-iter
+```
 
-# Or clone and run locally
+You can also install from a local checkout while developing:
+
+```bash
 git clone https://github.com/g0g5/opencode-spec-iter
-cd spec-iter
-python install.py /path/to/your/project/
+cd opencode-spec-iter
+uv tool install .
 ```
 
-Enter your project directory path when prompted. The installer will:
-- Copy plugin files to `.opencode/`
-- Create `.speciter/` directory for iteration management
-- Initialize `iters.json` for tracking
-- Update `.gitignore`
+## Initialize A Project
 
-## Commands
+Run this once per project:
 
-After installation, these commands become available in OpenCode:
-
-| Command | Description | Agent |
-|---------|-------------|-------|
-| `/spec <feature-idea>` | Create a specification document for your feature | build |
-| `/plan <iteration-id>` | Generate implementation plan from spec | build |
-| `/exec <iteration-id>` | Execute the implementation plan | plan |
-| `/post <iteration-id>` | Run post-implementation tasks | build |
-| `/agentsmd` | Create/update AGENTS.md project context | build |
-
-## Full Walkthrough
-
-This is the typical end-to-end workflow after the plugin is installed into a project.
-
-**How commands become prompts**: OpenCode loads markdown templates from `.opencode/commands/` (installed from this package's bundled assets). Placeholders like `$1`, `$2`, `$ARGUMENTS` are replaced with your command arguments. Inline shell snippets (``!`command` ``) execute and their output is inserted into the prompt. The LLM only sees the final rendered prompt, not the template.
-
-### 1. Create a spec with `/spec`
-
-Example:
-
-```text
-/spec add article summarization with citations for a knowledge base app
+```bash
+spec-iter init
 ```
 
-**What happens to your command**:
+Or point it at another directory:
 
-OpenCode loads `.opencode/commands/spec.md` and replaces `$ARGUMENTS` with your feature idea. The model receives the full template with your idea filled in.
-
-**What the model sees and does**:
-
-- Reads your feature idea
-- Pulls in any linked docs via `webfetch` if URLs are present
-- Asks follow-up questions (starting with "Iteration name")
-- Researches external libraries by delegating to `@explore` agents
-- Creates iteration: `python ./.opencode/scripts/iter_manager.py new <iteration-name>`
-- Writes spec to `.speciter/iterations/<iteration-name>/SPEC.md`
-- Updates stage: `python ./.opencode/scripts/iter_manager.py update 1 specified`
-
-### 2. Create the plan with `/plan 1`
-
-Example:
-
-```text
-/plan 1
+```bash
+spec-iter init path/to/project
 ```
 
-**What happens to your command**:
+`init` will:
+- create `.speciter/iterations/`
+- create `.speciter/iters.json` if missing
+- install or update managed files in `.opencode/commands/`
+- add `.speciter/` and `.opencode/commands/` to `.gitignore`
+- run `git init` when the project is not already a git repo
+- remove legacy managed helper scripts from `.opencode/scripts/` when safe
 
-OpenCode loads `.opencode/commands/plan.md`, which contains ``!`python ./.opencode/scripts/prompt-plan.py $1` ``. The shell executes with `$1` = `1`, and the script's output replaces the shell snippet. The model receives only the rendered prompt from the script.
+## CLI Commands
 
-**What the model sees and does**:
+These commands work from the project root or any subdirectory inside an initialized project.
 
-The script generates a prompt like:
-```
-You need to create the implementation plan based on .speciter/iterations/<name>/SPEC.md
-
-Follow this workflow strictly:
-1. Create the implementation plan from the spec...
-2. Save the plan as `.speciter/iterations/<name>/PLAN.md`...
-```
-
-The model writes the plan and updates stage to `planned`.
-
-**Why id `1` works**: Iteration IDs are positional. `1` always means "most recent" (sorted by last updated). Use `/list-iters` to see the current mapping.
-
-### 3. Execute implementation with `/exec 1`
-
-Example:
-
-```text
-/exec 1
+```bash
+spec-iter new add-search
+spec-iter list
+spec-iter update 1 specified
+spec-iter prompt 1 plan
+spec-iter prompt 1 exec
+spec-iter prompt 1 post
+spec-iter prompt agentsmd
 ```
 
-**What happens to your command**:
+## OpenCode Commands
 
-OpenCode loads `.opencode/commands/exec.md` with ``!`python ./.opencode/scripts/prompt-exec.py $1` ``. The script checks that `PLAN.md` exists, then outputs the execution prompt. The model receives only this generated prompt.
+After `spec-iter init`, OpenCode can load these bundled templates from `.opencode/commands/`:
 
-**What the model sees and does**:
+| Command | Description |
+|---------|-------------|
+| `/spec <feature-idea>` | Create a specification document for a new iteration |
+| `/plan <iteration-id>` | Generate an implementation plan from `SPEC.md` |
+| `/exec <iteration-id>` | Execute the implementation plan from `PLAN.md` |
+| `/post <iteration-id>` | Run post-implementation tasks and completion flow |
+| `/agentsmd` | Create or update `AGENTS.md` project context |
+| `/list-iters` | Show iteration ids and stages |
 
-The prompt instructs the model to:
-- Read `PLAN.md` and create a todo list
-- Use `task` to delegate one phase at a time to `@general` agents
-- Each delegated agent receives: "Read SPEC.md and PLAN.md, complete phase N"
-- After all phases, update stage to `executed`
+The bundled markdown templates now shell out to `spec-iter`, not project-local Python helper scripts.
 
-This is controlled implementation: plan-guided, phase-by-phase, single-threaded to avoid edit conflicts.
+## Workflow
 
-### 4. Run post-implementation with `/post 1`
+1. Run `/spec <idea>` and the agent creates an iteration with `spec-iter new <iteration-name>`.
+2. The agent writes `.speciter/iterations/<iteration-name>/SPEC.md` and updates the stage with `spec-iter update 1 specified`.
+3. Run `/plan 1` and the template inserts `spec-iter prompt 1 plan` output.
+4. Run `/exec 1` and the template inserts `spec-iter prompt 1 exec` output.
+5. Run `/post 1` and the template inserts `spec-iter prompt 1 post` output.
+6. Run `/agentsmd` when you want the helper prompt for `AGENTS.md`.
 
-Example:
-
-```text
-/post 1
-```
-
-**What happens to your command**:
-
-OpenCode loads `.opencode/commands/post.md` with ``!`python ./.opencode/scripts/prompt-post.py $1` ``. The script runs `git status --short` and `git diff --stat`, embedding the results in the generated prompt.
-
-**What the model sees and does**:
-
-The prompt includes actual git status/diff output, then instructs:
-- Review the changes (already shown)
-- Write `.speciter/iterations/<name>/FINISHED.md`
-- Commit all changes
-- Update stage to `completed`
-
-### 5. Create project context with `/agentsmd`
-
-Example:
-
-```text
-/agentsmd
-```
-
-**What happens to your command**:
-
-OpenCode loads `.opencode/commands/agentsmd.md` which executes ``!`python ./.opencode/scripts/prompt-agentsmd.py` ``. The script scans for context files (`README.md`, `AGENTS.md`, etc.) and recent git commits, then outputs a prompt to generate/update project context.
-
-**What the model sees and does**:
-
-Receives a prompt with discovered project files and conventions, then creates/updates `AGENTS.md` with a concise project overview, structure map, and development guide.
-
-**When to run**: After project setup, or before `/post` if the project structure changed during implementation.
-
-### Command-to-Prompt Reference
-
-| Command | Template File | Shell Execution | Final Prompt Source |
-|---------|--------------|-----------------|---------------------|
-| `/spec <idea>` | `.opencode/commands/spec.md` | None | Template with `$ARGUMENTS` replaced |
-| `/plan <id>` | `.opencode/commands/plan.md` | `prompt-plan.py $1` | Script stdout |
-| `/exec <id>` | `.opencode/commands/exec.md` | `prompt-exec.py $1` | Script stdout |
-| `/post <id>` | `.opencode/commands/post.md` | `prompt-post.py $1` | Script stdout (includes git status) |
-| `/agentsmd` | `.opencode/commands/agentsmd.md` | `prompt-agentsmd.py` | Script stdout |
-| `/list-iters` | `.opencode/commands/list-iters.md` | `iter_manager.py list` | Direct script output to user |
-
-
+Iteration ids are positional and 1-based. `1` always means the most recently updated iteration.
 
 ## Project Structure
 
-```
+```text
 spec-iter/
-├── spec_iter/
-│   ├── cli.py                     # Installer CLI entrypoint (`spec-iter`)
-│   └── bundled_src/
-│       ├── commands/              # Markdown-based command templates
-│       └── scripts/               # Python helper scripts for templates
-├── pyproject.toml                 # Packaging and console script config
-└── install.py                     # Backward-compatible wrapper (`python install.py`)
+|- spec_iter/
+|  |- cli.py                  # argparse entrypoint and command dispatch
+|  |- init.py                 # project initialization and managed file installation
+|  |- iterations.py           # iteration CRUD-style logic and path helpers
+|  |- project.py              # project-root discovery and path formatting
+|  |- prompts.py              # prompt generation for plan/exec/post/agentsmd
+|  \- bundled_src/
+|     \- commands/            # Markdown command templates copied to projects
+|- pyproject.toml             # packaging and console script config
+\- install.py                # backward-compatible wrapper for `spec-iter init`
 ```
-
-## Development Philosophy
-
-- **Markdown-first**: LLM prompts are written in markdown for readability
-- **Minimal Python**: Scripts handle execution, not logic
-- **Concise**: Avoid long prose, focus on actionable outputs
 
 ## Requirements
 
 - OpenCode CLI
-- uv (for `uvx` installation)
-- Python 3.x
+- uv
+- Python 3.9+
 - Git
 
 ## License

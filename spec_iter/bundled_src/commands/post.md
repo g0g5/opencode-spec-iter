@@ -3,4 +3,4 @@ description: Execute post implementation affairs.
 agent: build
 ---
 
-!`python ./.opencode/scripts/prompt-post.py $1`
+!`spec-iter prompt $1 post`

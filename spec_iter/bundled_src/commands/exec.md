@@ -3,4 +3,4 @@ description: Execute the implementation plan of iteration.
 agent: build
 ---
 
-!`python ./.opencode/scripts/prompt-exec.py $1`
+!`spec-iter prompt $1 exec`

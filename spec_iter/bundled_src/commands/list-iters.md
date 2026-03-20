@@ -5,6 +5,6 @@ agent: plan
 
 Below is the list of development iterations and their stage:
 
-!`python ./.opencode/scripts/iter_manager list`
+!`spec-iter list`
 
 Simply demonstrate the above information to the user, without any other action.
