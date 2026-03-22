@@ -11,7 +11,6 @@ from pathlib import Path
 MANAGED_COMMAND_FILES = (
     "agentsmd.md",
     "exec.md",
-    "list-iters.md",
     "plan.md",
     "post.md",
     "spec.md",
@@ -173,7 +172,7 @@ def initialize_project(target_path: Path) -> InitResult:
     commands_dir = _install_managed_commands(project_root)
     _append_gitignore_entries(
         project_root / ".gitignore",
-        [".speciter/", ".opencode/commands/"],
+        [".opencode/commands/"],
     )
     removed_legacy_scripts, legacy_scripts_dir = _cleanup_legacy_scripts(
         project_root,

@@ -40,7 +40,7 @@ spec-iter init path/to/project
 - create `.speciter/worktrees/`
 - create `.speciter/iters.json` if missing
 - install or update managed files in `.opencode/commands/`
-- add `.speciter/` and `.opencode/commands/` to `.gitignore`
+- add `.opencode/commands/` to `.gitignore`
 - run `git init` when the project is not already a git repo
 - normalize the current branch name to `main` when possible
 - remove legacy managed helper scripts from `.opencode/scripts/` when safe
@@ -78,9 +78,9 @@ After `spec-iter init`, OpenCode can load these bundled templates from `.opencod
 | `/exec <iteration-id>` | Execute the implementation plan from `PLAN.md` |
 | `/post <iteration-id>` | Run post-implementation tasks and completion flow |
 | `/agentsmd` | Create or update `AGENTS.md` project context |
-| `/list-iters` | Show iteration ids and stages |
 
 The bundled markdown templates now shell out to `spec-iter`, not project-local Python helper scripts.
+Use `spec-iter list` to list managed iterations and their stages.
 
 ## Workflow
 
