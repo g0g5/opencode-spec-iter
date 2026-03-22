@@ -20,8 +20,7 @@ spec-iter/
 |- pyproject.toml              # Packaging metadata and console script entrypoint
 |- README.md                   # User-facing install and workflow documentation
 |- AGENTS.md                   # Project guidance for coding agents
-|- install.py                  # Backward-compatible wrapper for `spec-iter init`
-\- clify.spec.md              # Current CLI companion refactor spec
+\- install.py                  # Backward-compatible wrapper for `spec-iter init`
 ```
 
 ## Development Guide
