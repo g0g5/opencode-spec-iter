@@ -70,7 +70,11 @@ def _install_managed_commands(project_root: Path) -> Path:
 def _ensure_speciter_state(project_root: Path) -> None:
     speciter_dir = project_root / ".speciter"
     iterations_dir = speciter_dir / "iterations"
+    docs_dir = speciter_dir / "docs"
+    worktrees_dir = speciter_dir / "worktrees"
     iterations_dir.mkdir(parents=True, exist_ok=True)
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    worktrees_dir.mkdir(parents=True, exist_ok=True)
 
     iters_file = speciter_dir / "iters.json"
     if not iters_file.exists():
@@ -122,6 +126,44 @@ def _maybe_init_git(project_root: Path, warnings: list[str]) -> None:
         warnings.append(f"`git init` failed; continuing ({detail})")
 
 
+def _normalize_main_branch(project_root: Path, warnings: list[str]) -> None:
+    if not (project_root / ".git").exists():
+        return
+
+    try:
+        current = subprocess.run(
+            ["git", "branch", "--show-current"],
+            cwd=project_root,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except FileNotFoundError:
+        warnings.append("git is not available; skipped `git branch -m main`")
+        return
+    except subprocess.CalledProcessError as exc:
+        detail = exc.stderr.strip() or exc.stdout.strip() or "unknown error"
+        warnings.append(f"`git branch --show-current` failed; continuing ({detail})")
+        return
+
+    if not current or current == "main":
+        return
+
+    try:
+        subprocess.run(
+            ["git", "branch", "-m", "main"],
+            cwd=project_root,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except FileNotFoundError:
+        warnings.append("git is not available; skipped `git branch -m main`")
+    except subprocess.CalledProcessError as exc:
+        detail = exc.stderr.strip() or exc.stdout.strip() or "unknown error"
+        warnings.append(f"`git branch -m main` failed; continuing ({detail})")
+
+
 def initialize_project(target_path: Path) -> InitResult:
     project_root = target_path.expanduser().resolve()
     project_root.mkdir(parents=True, exist_ok=True)
@@ -138,6 +180,7 @@ def initialize_project(target_path: Path) -> InitResult:
         warnings,
     )
     _maybe_init_git(project_root, warnings)
+    _normalize_main_branch(project_root, warnings)
 
     return InitResult(
         project_root=project_root,

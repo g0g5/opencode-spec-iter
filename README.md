@@ -36,10 +36,13 @@ spec-iter init path/to/project
 
 `init` will:
 - create `.speciter/iterations/`
+- create `.speciter/docs/`
+- create `.speciter/worktrees/`
 - create `.speciter/iters.json` if missing
 - install or update managed files in `.opencode/commands/`
 - add `.speciter/` and `.opencode/commands/` to `.gitignore`
 - run `git init` when the project is not already a git repo
+- normalize the current branch name to `main` when possible
 - remove legacy managed helper scripts from `.opencode/scripts/` when safe
 
 ## CLI Commands
@@ -50,10 +53,18 @@ These commands work from the project root or any subdirectory inside an initiali
 spec-iter new add-search
 spec-iter list
 spec-iter update 1 specified
+spec-iter prompt spec "add search with filters"
 spec-iter prompt 1 plan
 spec-iter prompt 1 exec
 spec-iter prompt 1 post
 spec-iter prompt agentsmd
+spec-iter run search react hooks
+spec-iter run plan 1
+spec-iter run plan 1 parallel
+spec-iter run dev 1 1
+spec-iter run dev 1 2 ui-phase
+spec-iter run merge ui-phase
+spec-iter run post 1
 ```
 
 ## OpenCode Commands
@@ -91,7 +102,7 @@ spec-iter/
 |  |- init.py                 # project initialization and managed file installation
 |  |- iterations.py           # iteration CRUD-style logic and path helpers
 |  |- project.py              # project-root discovery and path formatting
-|  |- prompts.py              # prompt generation for plan/exec/post/agentsmd
+|  |- prompts.py              # prompt generation for spec/plan/exec/post/agentsmd
 |  \- bundled_src/
 |     \- commands/            # Markdown command templates copied to projects
 |- pyproject.toml             # packaging and console script config

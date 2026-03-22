@@ -21,6 +21,17 @@ from spec_iter.prompts import (
     generate_exec_prompt,
     generate_plan_prompt,
     generate_post_prompt,
+    generate_spec_prompt,
+    generate_run_dev_prompt,
+    generate_run_merge_prompt,
+    generate_run_plan_prompt,
+    generate_run_search_prompt,
+)
+from spec_iter.run_ops import (
+    RunOperationError,
+    ensure_worktree_ready,
+    run_opencode,
+    validate_worktree_name,
 )
 
 
@@ -84,6 +95,12 @@ def _handle_prompt(args: argparse.Namespace) -> int:
         sys.stdout.write(generate_agentsmd_prompt(project_root))
         return 0
 
+    if args.target == "spec":
+        if args.kind is None:
+            raise PromptError("`spec-iter prompt spec <idea>` requires an idea")
+        sys.stdout.write(generate_spec_prompt(project_root, args.kind))
+        return 0
+
     if args.kind is None:
         raise PromptError("Prompt kind is required: plan, exec, or post")
 
@@ -108,6 +125,60 @@ def _handle_path(args: argparse.Namespace) -> int:
         else manager.get_plan_path(args.iter_id)
     )
     print(display_path(target_path))
+    return 0
+
+
+def _handle_run_search(args: argparse.Namespace) -> int:
+    project_root = find_project_root()
+    docs_dir = project_root / ".speciter" / "docs"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+
+    topics = " ".join(args.topics)
+    prompt = generate_run_search_prompt(project_root, args.lib_name, topics)
+    run_opencode(prompt, project_root)
+    return 0
+
+
+def _handle_run_plan(args: argparse.Namespace) -> int:
+    project_root = find_project_root()
+    prompt = generate_run_plan_prompt(
+        project_root,
+        args.iter_id,
+        parallel=args.mode == "parallel",
+    )
+    run_opencode(prompt, project_root)
+    return 0
+
+
+def _handle_run_dev(args: argparse.Namespace) -> int:
+    if args.phase_id < 1:
+        raise ValueError(f"Phase ID must be >= 1, got {args.phase_id}")
+
+    project_root = find_project_root()
+    prompt = generate_run_dev_prompt(project_root, args.iter_id, args.phase_id)
+
+    target_cwd = project_root
+    if args.worktree is not None:
+        target_cwd = ensure_worktree_ready(project_root, args.worktree)
+
+    run_opencode(prompt, target_cwd)
+    return 0
+
+
+def _handle_run_merge(args: argparse.Namespace) -> int:
+    project_root = find_project_root()
+    validate_worktree_name(args.worktree)
+
+    # Merge workflow targets the most recently updated iteration by default.
+    prompt = generate_run_merge_prompt(project_root, "1", args.worktree)
+    run_opencode(prompt, project_root)
+    return 0
+
+
+def _handle_run_post(args: argparse.Namespace) -> int:
+    project_root = find_project_root()
+    prompt = generate_post_prompt(project_root, args.iter_id)
+    run_opencode(prompt, project_root)
     return 0
 
 
@@ -147,9 +218,11 @@ def build_parser() -> argparse.ArgumentParser:
     update_parser.set_defaults(handler=_handle_update)
 
     prompt_parser = subparsers.add_parser("prompt", help="Generate a prompt")
-    prompt_parser.add_argument("target", help="Iteration ID or 'agentsmd'")
+    prompt_parser.add_argument("target", help="Iteration ID, 'spec', or 'agentsmd'")
     prompt_parser.add_argument(
-        "kind", nargs="?", choices=["plan", "exec", "post"], help="Prompt kind"
+        "kind",
+        nargs="?",
+        help="Prompt kind (plan/exec/post) or spec idea",
     )
     prompt_parser.set_defaults(handler=_handle_prompt)
 
@@ -161,6 +234,56 @@ def build_parser() -> argparse.ArgumentParser:
     status_parser = subparsers.add_parser("status", help=argparse.SUPPRESS)
     status_parser.add_argument("iter_id", help=argparse.SUPPRESS)
     status_parser.set_defaults(handler=_handle_status)
+
+    run_parser = subparsers.add_parser(
+        "run",
+        help="Run an OpenCode operation prompt",
+    )
+    run_subparsers = run_parser.add_subparsers(dest="operation", required=True)
+
+    run_search_parser = run_subparsers.add_parser(
+        "search",
+        help="Run library research and save docs under .speciter/docs",
+    )
+    run_search_parser.add_argument("lib_name", help="Library name")
+    run_search_parser.add_argument("topics", nargs="+", help="Related topics")
+    run_search_parser.set_defaults(handler=_handle_run_search)
+
+    run_plan_parser = run_subparsers.add_parser(
+        "plan",
+        help="Run plan generation",
+    )
+    run_plan_parser.add_argument("iter_id", help="Iteration ID (1 = most recent)")
+    run_plan_parser.add_argument(
+        "mode",
+        nargs="?",
+        choices=["parallel"],
+        help="Optional parallel planning mode",
+    )
+    run_plan_parser.set_defaults(handler=_handle_run_plan)
+
+    run_dev_parser = run_subparsers.add_parser(
+        "dev",
+        help="Run single-phase development in workspace or worktree",
+    )
+    run_dev_parser.add_argument("iter_id", help="Iteration ID (1 = most recent)")
+    run_dev_parser.add_argument("phase_id", type=int, help="Phase ID (>= 1)")
+    run_dev_parser.add_argument("worktree", nargs="?", help="Optional worktree name")
+    run_dev_parser.set_defaults(handler=_handle_run_dev)
+
+    run_merge_parser = run_subparsers.add_parser(
+        "merge",
+        help="Run merge workflow for an agent worktree",
+    )
+    run_merge_parser.add_argument("worktree", help="Worktree name")
+    run_merge_parser.set_defaults(handler=_handle_run_merge)
+
+    run_post_parser = run_subparsers.add_parser(
+        "post",
+        help="Run post-implementation workflow",
+    )
+    run_post_parser.add_argument("iter_id", help="Iteration ID (1 = most recent)")
+    run_post_parser.set_defaults(handler=_handle_run_post)
 
     return parser
 
@@ -175,6 +298,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         FileNotFoundError,
         ProjectNotInitializedError,
         PromptError,
+        RunOperationError,
         ValueError,
     ) as exc:
         print(f"Error: {exc}", file=sys.stderr)

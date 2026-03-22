@@ -5,7 +5,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from spec_iter.iterations import IterManager
+from spec_iter.iterations import IterManager, to_kebab_case
 from spec_iter.project import display_path
 
 
@@ -162,6 +162,162 @@ Git Diff (stats):
 3. Commit all changes, regardless created by this iteration or not.
 
 4. Run command `spec-iter update {iter_id} completed`"""
+
+
+def _list_research_docs(project_root: Path) -> list[str]:
+    docs_dir = project_root / ".speciter" / "docs"
+    if not docs_dir.exists() or not docs_dir.is_dir():
+        return []
+
+    return sorted(
+        display_path(path, project_root)
+        for path in docs_dir.iterdir()
+        if path.is_file()
+    )
+
+
+def generate_spec_prompt(project_root: Path, idea: str) -> str:
+    cleaned_idea = idea.strip()
+    if not cleaned_idea:
+        raise PromptError("Idea is required: `spec-iter prompt spec <idea>`")
+
+    default_iteration_name = to_kebab_case(cleaned_idea) or "new-iteration"
+    docs_files = _list_research_docs(project_root)
+    has_docs = bool(docs_files)
+    identify_step_no = 5 if has_docs else 4
+    create_step_no = 6 if has_docs else 5
+
+    lines = [
+        "In this iteration, the user wants to build:",
+        "",
+        cleaned_idea,
+        "",
+        "Follow this workflow strictly:",
+        "",
+        "1. If any web link or file exist in user ideas, read them for the context.",
+        "",
+        "2. Gather requirements with the `question` tool.",
+        "   - The first question must be: `Iteration name`.",
+        "   - Suggest a kebab-case default iteration name derived from the user idea: "
+        f"`{default_iteration_name}`.",
+        "   - Keep asking follow-up questions until you have enough information to write a complete SPEC.",
+        "",
+        "3. Run command `spec-iter new <iteration-name>`, where `<iteration-name>` is the confirmed iteration name from step 2.",
+    ]
+
+    if has_docs:
+        docs_display = ", ".join(f"`{name}`" for name in docs_files)
+        lines.extend(
+            [
+                "",
+                f"4. Read the researched external library documents in `.speciter/docs/`: {docs_display}",
+            ]
+        )
+
+    lines.extend(
+        [
+            "",
+            f"{identify_step_no}. Identify external library dependencies needed for this iteration.",
+            "   - List the key libraries that are likely required.",
+            "   - Delegate research to `@explore` agents, one agent per library.",
+            "   - Use this exact delegation prompt template:",
+            "     - `Do web search to find out latest documentation of <library name>, about <related topics to iteration's goal>, return highly concise code examples of how to use the library with minimal prose.`",
+            "",
+            f"{create_step_no}. Create the SPEC document.",
+            "   - Write a concise but actionable SPEC using the gathered answers and library research. Avoid long prose, use researched code examples.",
+            "   - Save it to: `.speciter/iterations/<iteration-name>/SPEC.md`",
+            "   - Run command `spec-iter update 1 specified`",
+        ]
+    )
+
+    return "\n".join(lines)
+
+
+def _missing_spec_error(
+    spec_path: Path, project_root: Path, iter_id: str
+) -> PromptError:
+    return PromptError(
+        f"SPEC.md not found at {display_path(spec_path, project_root)}. "
+        f"Check path with `spec-iter path {iter_id} spec`, then tell the user to run `/spec` to create SPEC.md first."
+    )
+
+
+def _missing_plan_error(
+    plan_path: Path, project_root: Path, iter_id: str
+) -> PromptError:
+    return PromptError(
+        f"PLAN.md not found at {display_path(plan_path, project_root)}. "
+        f"Check path with `spec-iter path {iter_id} plan`, then tell the user to run `/plan` to create PLAN.md first."
+    )
+
+
+def generate_run_search_prompt(project_root: Path, lib_name: str, topics: str) -> str:
+    lib_goal = to_kebab_case(f"{lib_name} {topics}")
+    if not lib_goal:
+        raise PromptError("Unable to derive docs filename from library name and topics")
+
+    docs_path = project_root / ".speciter" / "docs" / f"{lib_goal}.md"
+    return (
+        "Do web search to find out latest documentation of "
+        f"{lib_name}, about {topics}, return highly concise code examples of how "
+        "to use the library with minimal prose. "
+        f"Save the findings as {display_path(docs_path, project_root)}"
+    )
+
+
+def generate_run_plan_prompt(
+    project_root: Path, iter_id: str, parallel: bool = False
+) -> str:
+    base_prompt = generate_plan_prompt(project_root, iter_id)
+    if not parallel:
+        return base_prompt
+
+    parallel_instruction = """
+
+Additional parallel planning requirement:
+- Identify phases that can run independently on different worktrees.
+- Group independent phases by worktree assignment."""
+    return f"{base_prompt}{parallel_instruction}"
+
+
+def generate_run_dev_prompt(project_root: Path, iter_id: str, phase_id: int) -> str:
+    manager = IterManager(project_root)
+    spec_path = manager.get_spec_path(iter_id)
+    plan_path = manager.get_plan_path(iter_id)
+
+    if not spec_path.exists():
+        raise _missing_spec_error(spec_path, project_root, iter_id)
+    if not plan_path.exists():
+        raise _missing_plan_error(plan_path, project_root, iter_id)
+
+    return (
+        f"Read {display_path(spec_path, project_root)} and "
+        f"{display_path(plan_path, project_root)}, ONLY complete phase {phase_id}. "
+        "After completion, take a note what you completed in PLAN.md "
+        "after the phase you worked on."
+    )
+
+
+def generate_run_merge_prompt(project_root: Path, iter_id: str, worktree: str) -> str:
+    manager = IterManager(project_root)
+    spec_path = manager.get_spec_path(iter_id)
+    plan_path = manager.get_plan_path(iter_id)
+    branch_name = f"agent/{worktree}"
+    worktree_path = project_root / ".speciter" / "worktrees" / worktree
+
+    if not spec_path.exists():
+        raise _missing_spec_error(spec_path, project_root, iter_id)
+    if not plan_path.exists():
+        raise _missing_plan_error(plan_path, project_root, iter_id)
+
+    return (
+        f"Read {display_path(spec_path, project_root)} and "
+        f"{display_path(plan_path, project_root)}, make sure all phases of {worktree} "
+        "are completed; if not, abort immediately. "
+        f"merge {branch_name} branch back to main branch, resolve the conflicts "
+        "respecting SPEC; after merge, remove the "
+        f"{branch_name} branch and worktree {display_path(worktree_path, project_root)}."
+    )
 
 
 def _find_instruction_files(project_root: Path) -> list[str]:
