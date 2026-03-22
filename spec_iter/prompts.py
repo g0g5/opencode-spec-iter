@@ -120,17 +120,11 @@ Follow this workflow strictly:
 
 1. Read `{display_path(plan_path)}` to understand the implementation plan. Create and maintain a todo list for all plan phases.
 
-2. Delegate exactly one implementation phase at a time to one `@general` agent.
-   - Never run multiple implementation agents in parallel; this avoids edit conflicts.
+2. invoke exactly one dev operation `spec-iter run dev {iter_id} <phase-id>` to implement a phase at a time.
 
-3. For each delegated phase, send this exact instruction to the `@general` agent:
-   - `Read {display_path(spec_path)} and {display_path(plan_path)}, complete phase <phase number>.`
+3. After all phases are complete, check PLAN.md to see if all phases are completed, then report to use what have been done.
 
-4. When a phase is finished, delegate the next phase to a new `@general` agent.
-
-5. After all phases are complete, report what was done to the user.
-
-6. Run command `spec-iter update {iter_id} executed`"""
+4. Run command `spec-iter update {iter_id} executed`"""
 
 
 def generate_post_prompt(project_root: Path, iter_id: str) -> str:
@@ -219,9 +213,7 @@ def generate_spec_prompt(project_root: Path, idea: str) -> str:
             "",
             f"{identify_step_no}. Identify external library dependencies needed for this iteration.",
             "   - List the key libraries that are likely required.",
-            "   - Delegate research to `@explore` agents, one agent per library.",
-            "   - Use this exact delegation prompt template:",
-            "     - `Do web search to find out latest documentation of <library name>, about <related topics to iteration's goal>, return highly concise code examples of how to use the library with minimal prose.`",
+            '   - run `spec-iter run <library-name> "<topics to research>"` to invoke library researches.',
             "",
             f"{create_step_no}. Create the SPEC document.",
             "   - Write a concise but actionable SPEC using the gathered answers and library research. Avoid long prose, use researched code examples.",
