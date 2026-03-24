@@ -20,11 +20,7 @@ Follow this workflow strictly:
 
 4. Identify external library dependencies needed for this iteration.
    - List the key libraries that are likely required.
-   - Delegate research to `@explore` agents, one agent per library.
-   - Each delegated agent must focus on only one library and return:
-     - highly concise code examples directly related to the iteration goal,
-     - implementation-focused outputs that show how to use the library,
-     - minimal prose (focus on "how", not "why").
+   - Delegate research to `@general` agents, one agent per library.
    - Use this exact delegation prompt template:
      - `Do web search to find out latest documentation of <library name>, about <related topics to iteration's goal>, return highly concise code examples of how to use the library with minimal prose. Save a report as ./docs/<topic>.md`
    - Read the research reports in docs/

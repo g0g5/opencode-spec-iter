@@ -1,4 +1,11 @@
 .ruff_cache
-**/__pycache__/
-docs/
-*.egg-info/
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
