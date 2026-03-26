@@ -24,4 +24,4 @@ where = ["."]
 include = ["spec_iter*"]
 
 [tool.setuptools.package-data]
-spec_iter = ["bundled_src/commands/*.md"]
+spec_iter = ["bundled_src/commands/*.md", "templates/*.md"]

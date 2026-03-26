@@ -1,0 +1,4 @@
+- Inspect workspace to understand:
+  - WHAT - Identify the tech stack and map the project as modules (folders or single-file modules) with one-line purpose per module. In monorepos, include every app and shared package as top-level modules.
+  - WHY - State the project's purpose and the role of each major component.
+  - HOW - Specify only the most universally-needed commands: how to build, run tests, run typechecks, and verify changes. Do not list every possible command-only the ones used in nearly every task.

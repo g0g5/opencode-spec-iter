@@ -22,7 +22,7 @@ Follow this workflow strictly:
    - List the key libraries that are likely required.
    - Delegate research to `@general` agents, one agent per library.
    - Use this exact delegation prompt template:
-     - `Do web search to find out latest documentation of <library name>, about <related topics to iteration's goal>, return highly concise code examples of how to use the library with minimal prose. Save a report as ./docs/<topic>.md`
+     - `Do web search to find out latest documentation of <library name>, about <related topics to iteration's goal>, return highly concise code examples of how to use the library with minimal prose. Save a report as .speciter/docs/<topic>.md`
    - Read the research reports in docs/
 
 5. Create the SPEC document.
