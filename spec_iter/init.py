@@ -36,7 +36,7 @@ class InitResult:
 
 
 def _bundled_commands_dir() -> Path:
-    return Path(__file__).resolve().parent / "bundled_src" / "commands"
+    return Path(__file__).resolve().parent / "commands"
 
 
 def _append_gitignore_entries(gitignore_path: Path, entries: list[str]) -> None:

@@ -92,8 +92,7 @@ spec-iter/
 |  |- iterations.py           # iteration CRUD-style logic and path helpers
 |  |- project.py              # project-root discovery and path formatting
 |  |- prompts.py              # prompt generation for plan/exec/post/agentsmd
-|  \- bundled_src/
-|     \- commands/            # Markdown command templates copied to projects
+|  \- commands/               # Markdown command templates copied to projects
 |- pyproject.toml             # packaging and console script config
 \- install.py                # backward-compatible wrapper for `spec-iter init`
 ```
