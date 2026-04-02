@@ -9,7 +9,7 @@ Follow this workflow strictly:
    - Never run multiple implementation agents in parallel; this avoids edit conflicts.
 
 3. For each delegated phase, send this exact instruction to the `@general` agent:
-   - `Read {{spec_path}} and {{plan_path}}, complete phase <phase number>.`
+   - `{{exec_phase_prompt}}`
 
 4. When a phase is finished, delegate the next phase to a new `@general` agent.
 

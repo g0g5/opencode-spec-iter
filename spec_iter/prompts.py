@@ -14,16 +14,24 @@ class PromptError(RuntimeError):
     """Raised when prompt generation cannot proceed."""
 
 
-def _load_template(template_name: str) -> str:
+def _load_prompt(group_name: str, prompt_name: str) -> str:
     try:
         return (
             resources.files("spec_iter")
-            .joinpath("templates", template_name)
+            .joinpath(group_name, prompt_name)
             .read_text(encoding="utf-8")
             .strip("\n")
         )
     except FileNotFoundError as exc:
-        raise PromptError(f"Prompt template not found: {template_name}") from exc
+        raise PromptError(f"Prompt not found: {group_name}/{prompt_name}") from exc
+
+
+def _load_command_prompt(prompt_name: str) -> str:
+    return _load_prompt("command_prompts", prompt_name)
+
+
+def _load_subagent_prompt(prompt_name: str) -> str:
+    return _load_prompt("subagent_prompts", prompt_name)
 
 
 def _render_template(template: str, variables: dict[str, str]) -> str:
@@ -63,7 +71,7 @@ def generate_plan_prompt(project_root: Path, iter_id: str) -> str:
         )
 
     return _render_template(
-        _load_template("plan.md"),
+        _load_command_prompt("plan.md"),
         {
             "spec_path": display_path(spec_path),
             "plan_path": display_path(iteration_path / "PLAN.md"),
@@ -83,12 +91,21 @@ def generate_exec_prompt(project_root: Path, iter_id: str) -> str:
             f"Check path with `spec-iter path {iter_id} plan`, then tell the user to run `/plan` to create PLAN.md first."
         )
 
+    exec_phase_prompt = _render_template(
+        _load_subagent_prompt("exec-phase.md"),
+        {
+            "plan_path": display_path(plan_path),
+            "spec_path": display_path(spec_path),
+        },
+    )
+
     return _render_template(
-        _load_template("exec.md"),
+        _load_command_prompt("exec.md"),
         {
             "plan_path": display_path(plan_path),
             "spec_path": display_path(spec_path),
             "iter_id": iter_id,
+            "exec_phase_prompt": exec_phase_prompt,
         },
     )
 
@@ -100,12 +117,21 @@ def generate_post_prompt(project_root: Path, iter_id: str) -> str:
     git_diff = _git_output(project_root, "diff", "--stat")
 
     return _render_template(
-        _load_template("post.md"),
+        _load_command_prompt("post.md"),
         {
             "iter_id": iter_id,
             "git_status": git_status,
             "git_diff": git_diff,
             "finished_path": display_path(iteration_path / "FINISHED.md"),
+        },
+    )
+
+
+def generate_spec_prompt() -> str:
+    return _render_template(
+        _load_command_prompt("spec.md"),
+        {
+            "research_prompt": _load_subagent_prompt("research.md"),
         },
     )
 
@@ -135,9 +161,9 @@ def generate_agentsmd_prompt(project_root: Path) -> str:
     commits = _get_recent_commits(project_root)
 
     prompt_parts = [
-        _load_template("agentsmd_intro_with.md")
+        _load_command_prompt("agentsmd_intro_with.md")
         if has_agents_md
-        else _load_template("agentsmd_intro_without.md"),
+        else _load_command_prompt("agentsmd_intro_without.md"),
         "",
     ]
 
@@ -153,11 +179,11 @@ def generate_agentsmd_prompt(project_root: Path) -> str:
     if found_files or commits:
         prompt_parts.append("")
 
-    prompt_parts.append(_load_template("agentsmd_inspect_workspace.md"))
+    prompt_parts.append(_load_command_prompt("agentsmd_inspect_workspace.md"))
 
     if has_agents_md:
-        prompt_parts.append(_load_template("agentsmd_focus_existing.md"))
+        prompt_parts.append(_load_command_prompt("agentsmd_focus_existing.md"))
 
     prompt_parts.append("")
-    prompt_parts.append(_load_template("agentsmd_write_block.md"))
+    prompt_parts.append(_load_command_prompt("agentsmd_write_block.md"))
     return "\n".join(prompt_parts)

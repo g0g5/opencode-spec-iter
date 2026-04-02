@@ -53,6 +53,7 @@ spec-iter update 1 specified
 spec-iter prompt 1 plan
 spec-iter prompt 1 exec
 spec-iter prompt 1 post
+spec-iter prompt spec
 spec-iter prompt agentsmd
 ```
 
@@ -91,7 +92,9 @@ spec-iter/
 |  |- init.py                 # project initialization and managed file installation
 |  |- iterations.py           # iteration CRUD-style logic and path helpers
 |  |- project.py              # project-root discovery and path formatting
-|  |- prompts.py              # prompt generation for plan/exec/post/agentsmd
+|  |- prompts.py              # prompt generation for command and subagent workflows
+|  |- command_prompts/        # packaged prompt templates for top-level OpenCode commands
+|  |- subagent_prompts/       # packaged prompt templates for delegated subagent tasks
 |  \- commands/               # Markdown command templates copied to projects
 |- pyproject.toml             # packaging and console script config
 \- install.py                # backward-compatible wrapper for `spec-iter init`

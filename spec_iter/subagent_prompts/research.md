@@ -1,0 +1,1 @@
+Do web search to find out latest documentation of <library name>, about <related topics to iteration's goal>, return highly concise code examples of how to use the library with minimal prose. Save a report as .speciter/docs/<topic>.md
