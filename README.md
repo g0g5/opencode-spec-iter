@@ -36,9 +36,10 @@ spec-iter init path/to/project
 
 `init` will:
 - create `.speciter/iterations/`
+- create `.speciter/docs/`
 - create `.speciter/iters.json` if missing
 - install or update managed files in `.opencode/commands/`
-- add `.speciter/` and `.opencode/commands/` to `.gitignore`
+- add `.opencode/commands/` to `.gitignore`
 - run `git init` when the project is not already a git repo
 - remove legacy managed helper scripts from `.opencode/scripts/` when safe
 

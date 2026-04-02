@@ -70,7 +70,9 @@ def _install_managed_commands(project_root: Path) -> Path:
 def _ensure_speciter_state(project_root: Path) -> None:
     speciter_dir = project_root / ".speciter"
     iterations_dir = speciter_dir / "iterations"
+    docs_dir = speciter_dir / "docs"
     iterations_dir.mkdir(parents=True, exist_ok=True)
+    docs_dir.mkdir(parents=True, exist_ok=True)
 
     iters_file = speciter_dir / "iters.json"
     if not iters_file.exists():
@@ -131,7 +133,7 @@ def initialize_project(target_path: Path) -> InitResult:
     commands_dir = _install_managed_commands(project_root)
     _append_gitignore_entries(
         project_root / ".gitignore",
-        [".speciter/", ".opencode/commands/"],
+        [".opencode/commands/"],
     )
     removed_legacy_scripts, legacy_scripts_dir = _cleanup_legacy_scripts(
         project_root,
