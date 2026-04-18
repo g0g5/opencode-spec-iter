@@ -1,4 +1,5 @@
-- Inspect workspace to understand:
-  - WHAT - Identify the tech stack and map the project as modules (folders or single-file modules) with one-line purpose per module. In monorepos, include every app and shared package as top-level modules.
+- Delegate this workspace inspection to one `@explore` agent. Do not inspect the workspace yourself.
+- Ask the delegated `@explore` agent to inspect the workspace to understand:
+  - WHAT - Identify the tech stack and map the project as a structure tree with one-line purpose per item. Always include the meaningful directory hierarchy, including deeper nested directories when they clarify module boundaries. For files, be selective: include only architecturally important files, such as entrypoints, shared foundations, registries, orchestration files, and files that other project code depends on. Omit leaf implementation files and repetitive sibling files that are mostly interchangeable or isolated variants, unless one is the canonical entrypoint or shared base. Exclude dot-prefixed internals and generated/build/cache/vendor directories unless they are part of the core source layout. In monorepos, include every app and shared package as top-level modules.
   - WHY - State the project's purpose and the role of each major component.
   - HOW - Specify only the most universally-needed commands: how to build, run tests, run typechecks, and verify changes. Do not list every possible command-only the ones used in nearly every task.
