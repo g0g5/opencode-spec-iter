@@ -18,6 +18,6 @@ Git Diff (stats):
    - `{{finished_path}}`
    - Keep it concise and implementation-focused.
 
-3. Commit all changes, regardless created by this iteration or not.
+3. Run command `spec-iter update {{iter_id}} completed`
 
-4. Run command `spec-iter update {{iter_id}} completed`
+4. Commit all changes, regardless created by this iteration or not.
