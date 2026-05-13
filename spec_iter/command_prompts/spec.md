@@ -11,6 +11,7 @@ Based on above user idea, follow this workflow strictly:
 
 4. Identify external library dependencies needed for this iteration.
    - List the key libraries that are likely required.
+   {{existing_docs_section}}   
    - Delegate research to `@general` agents, one agent per library.
    - Use this exact delegation prompt template:
      - `{{research_prompt}}`

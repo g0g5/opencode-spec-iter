@@ -82,7 +82,7 @@ def _handle_prompt(args: argparse.Namespace) -> int:
     if args.target == "spec":
         if args.kind is not None:
             raise PromptError("`spec-iter prompt spec` does not take a prompt kind")
-        sys.stdout.write(generate_spec_prompt())
+        sys.stdout.write(generate_spec_prompt(project_root))
         return 0
 
     if args.target == "agentsmd":

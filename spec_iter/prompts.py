@@ -113,13 +113,14 @@ def generate_exec_prompt(project_root: Path, iter_id: str) -> str:
 def generate_post_prompt(project_root: Path, iter_id: str) -> str:
     manager = IterManager(project_root)
     iteration_path = manager.get_iteration_path(iter_id)
+    spec_path = manager.get_spec_path(iter_id)
     git_status = _git_output(project_root, "status", "--short")
     git_diff = _git_output(project_root, "diff", "--stat")
 
     return _render_template(
         _load_command_prompt("post.md"),
         {
-            "iter_id": iter_id,
+            "spec_path": display_path(spec_path),
             "git_status": git_status,
             "git_diff": git_diff,
             "finished_path": display_path(iteration_path / "FINISHED.md"),
@@ -127,11 +128,28 @@ def generate_post_prompt(project_root: Path, iter_id: str) -> str:
     )
 
 
-def generate_spec_prompt() -> str:
+def _existing_docs_section(project_root: Path) -> str:
+    docs_dir = project_root / ".speciter" / "docs"
+    if not docs_dir.is_dir():
+        return ""
+    md_files = sorted(f.name for f in docs_dir.iterdir() if f.is_file() and f.suffix == ".md")
+    if not md_files:
+        return ""
+    file_list = "\n".join(f"      - {f}" for f in md_files)
+    return (
+        "    - Existing research docs found in .speciter/docs/:\n"
+        f"{file_list}\n"
+        "    - Review these existing docs first to understand what has already been researched.\n"
+        "    - Focus new research only on libraries, APIs, or patterns not yet covered.\n"
+    )
+
+
+def generate_spec_prompt(project_root: Path) -> str:
     return _render_template(
         _load_command_prompt("spec.md"),
         {
             "research_prompt": _load_subagent_prompt("research.md"),
+            "existing_docs_section": _existing_docs_section(project_root),
         },
     )
 

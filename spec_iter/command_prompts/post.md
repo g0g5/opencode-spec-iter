@@ -1,4 +1,4 @@
-You execute post-implementation tasks for iteration `{{iter_id}}`.
+You execute post-implementation tasks for `{{spec_path}}`.
 
 Follow this workflow strictly:
 
