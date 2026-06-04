@@ -128,80 +128,20 @@ def generate_post_prompt(project_root: Path, iter_id: str) -> str:
     )
 
 
-def _existing_docs_section(project_root: Path) -> str:
-    docs_dir = project_root / ".speciter" / "docs"
-    if not docs_dir.is_dir():
-        return ""
-    md_files = sorted(f.name for f in docs_dir.iterdir() if f.is_file() and f.suffix == ".md")
-    if not md_files:
-        return ""
-    file_list = "\n".join(f"      - {f}" for f in md_files)
-    return (
-        "    - Existing research docs found in .speciter/docs/:\n"
-        f"{file_list}\n"
-        "    - Review these existing docs first to understand what has already been researched.\n"
-        "    - Focus new research only on libraries, APIs, or patterns not yet covered.\n"
-    )
-
-
 def generate_spec_prompt(project_root: Path) -> str:
+    agentsmd_step = ""
+    if not (project_root / "AGENTS.md").is_file():
+        agentsmd_step = """
+
+6. Create a minimal AGENTS.md:
+   - Do not use `agents-md` skill or other similar skills, create directly with only following two components:
+   - Project overview (by iteration goal and current status)
+   - Tech stack"""
+
     return _render_template(
         _load_command_prompt("spec.md"),
         {
+            "agentsmd_step": agentsmd_step,
             "research_prompt": _load_subagent_prompt("research.md"),
-            "existing_docs_section": _existing_docs_section(project_root),
         },
     )
-
-
-def _find_instruction_files(project_root: Path) -> list[str]:
-    candidates = ["README.md", "CLAUDE.md", "AGENTS.md", ".cursorrules"]
-    return [filename for filename in candidates if (project_root / filename).is_file()]
-
-
-def _get_recent_commits(project_root: Path) -> str | None:
-    try:
-        result = subprocess.run(
-            ["git", "log", "--oneline", "-10"],
-            cwd=project_root,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        return result.stdout.strip() or None
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
-
-
-def generate_agentsmd_prompt(project_root: Path) -> str:
-    found_files = _find_instruction_files(project_root)
-    has_agents_md = "AGENTS.md" in found_files
-    commits = _get_recent_commits(project_root)
-
-    prompt_parts = [
-        _load_command_prompt("agentsmd_intro_with.md")
-        if has_agents_md
-        else _load_command_prompt("agentsmd_intro_without.md"),
-        "",
-    ]
-
-    if found_files:
-        prompt_parts.append(
-            f"- Read the found instruction files for context: {', '.join(found_files)}"
-        )
-
-    if commits:
-        prompt_parts.append("- Read the following recent commit messages:")
-        prompt_parts.append(commits)
-
-    if found_files or commits:
-        prompt_parts.append("")
-
-    prompt_parts.append(_load_command_prompt("agentsmd_inspect_workspace.md"))
-
-    if has_agents_md:
-        prompt_parts.append(_load_command_prompt("agentsmd_focus_existing.md"))
-
-    prompt_parts.append("")
-    prompt_parts.append(_load_command_prompt("agentsmd_write_block.md"))
-    return "\n".join(prompt_parts)

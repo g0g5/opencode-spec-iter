@@ -37,6 +37,7 @@ spec-iter init path/to/project
 `init` will:
 - create `.speciter/iterations/`
 - create `.speciter/docs/`
+- create or update `.speciter/templates/`
 - create `.speciter/iters.json` if missing
 - install or update managed files in `.opencode/commands/`
 - add `.opencode/commands/` to `.gitignore`
@@ -55,7 +56,6 @@ spec-iter prompt 1 plan
 spec-iter prompt 1 exec
 spec-iter prompt 1 post
 spec-iter prompt spec
-spec-iter prompt agentsmd
 ```
 
 ## OpenCode Commands
@@ -68,10 +68,11 @@ After `spec-iter init`, OpenCode can load these bundled templates from `.opencod
 | `/plan <iteration-id>` | Generate an implementation plan from `SPEC.md` |
 | `/exec <iteration-id>` | Execute the implementation plan from `PLAN.md` |
 | `/post <iteration-id>` | Run post-implementation tasks and completion flow |
-| `/agentsmd` | Create or update `AGENTS.md` project context |
 | `/list-iters` | Show iteration ids and stages |
 
 The bundled markdown templates now shell out to `spec-iter`, not project-local Python helper scripts.
+
+The previous `/agentsmd` command has moved out of Spec Iter. Use the separate [agents-md skill project](https://github.com/g0g5/agents-md-skill) for creating or updating `AGENTS.md` project context.
 
 ## Workflow
 
@@ -80,7 +81,6 @@ The bundled markdown templates now shell out to `spec-iter`, not project-local P
 3. Run `/plan 1` and the template inserts `spec-iter prompt 1 plan` output.
 4. Run `/exec 1` and the template inserts `spec-iter prompt 1 exec` output.
 5. Run `/post 1` and the template inserts `spec-iter prompt 1 post` output.
-6. Run `/agentsmd` when you want the helper prompt for `AGENTS.md`.
 
 Iteration ids are positional and 1-based. `1` always means the most recently updated iteration.
 

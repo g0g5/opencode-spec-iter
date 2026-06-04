@@ -9,12 +9,19 @@ from pathlib import Path
 
 
 MANAGED_COMMAND_FILES = (
-    "agentsmd.md",
     "exec.md",
     "list-iters.md",
     "plan.md",
     "post.md",
     "spec.md",
+)
+
+OBSOLETE_COMMAND_FILES = (
+    "agentsmd.md",
+)
+
+MANAGED_TEMPLATE_FILES = (
+    "SPEC.md",
 )
 
 LEGACY_SCRIPT_FILES = {
@@ -37,6 +44,10 @@ class InitResult:
 
 def _bundled_commands_dir() -> Path:
     return Path(__file__).resolve().parent / "commands"
+
+
+def _bundled_templates_dir() -> Path:
+    return Path(__file__).resolve().parent / "templates"
 
 
 def _append_gitignore_entries(gitignore_path: Path, entries: list[str]) -> None:
@@ -65,6 +76,25 @@ def _install_managed_commands(project_root: Path) -> Path:
         shutil.copyfile(source_dir / filename, commands_dir / filename)
 
     return commands_dir
+
+
+def _cleanup_obsolete_commands(project_root: Path) -> None:
+    commands_dir = project_root / ".opencode" / "commands"
+    for filename in OBSOLETE_COMMAND_FILES:
+        target = commands_dir / filename
+        if target.is_file():
+            target.unlink()
+
+
+def _install_managed_templates(project_root: Path) -> Path:
+    source_dir = _bundled_templates_dir()
+    templates_dir = project_root / ".speciter" / "templates"
+    templates_dir.mkdir(parents=True, exist_ok=True)
+
+    for filename in MANAGED_TEMPLATE_FILES:
+        shutil.copyfile(source_dir / filename, templates_dir / filename)
+
+    return templates_dir
 
 
 def _ensure_speciter_state(project_root: Path) -> None:
@@ -130,7 +160,9 @@ def initialize_project(target_path: Path) -> InitResult:
 
     warnings: list[str] = []
     _ensure_speciter_state(project_root)
+    _install_managed_templates(project_root)
     commands_dir = _install_managed_commands(project_root)
+    _cleanup_obsolete_commands(project_root)
     _append_gitignore_entries(
         project_root / ".gitignore",
         [".opencode/commands/"],

@@ -17,7 +17,6 @@ from spec_iter.project import (
 )
 from spec_iter.prompts import (
     PromptError,
-    generate_agentsmd_prompt,
     generate_exec_prompt,
     generate_spec_prompt,
     generate_plan_prompt,
@@ -85,12 +84,6 @@ def _handle_prompt(args: argparse.Namespace) -> int:
         sys.stdout.write(generate_spec_prompt(project_root))
         return 0
 
-    if args.target == "agentsmd":
-        if args.kind is not None:
-            raise PromptError("`spec-iter prompt agentsmd` does not take a prompt kind")
-        sys.stdout.write(generate_agentsmd_prompt(project_root))
-        return 0
-
     if args.kind is None:
         raise PromptError("Prompt kind is required: plan, exec, or post")
 
@@ -154,7 +147,7 @@ def build_parser() -> argparse.ArgumentParser:
     update_parser.set_defaults(handler=_handle_update)
 
     prompt_parser = subparsers.add_parser("prompt", help="Generate a prompt")
-    prompt_parser.add_argument("target", help="Iteration ID, 'spec', or 'agentsmd'")
+    prompt_parser.add_argument("target", help="Iteration ID or 'spec'")
     prompt_parser.add_argument(
         "kind", nargs="?", choices=["plan", "exec", "post"], help="Prompt kind"
     )
