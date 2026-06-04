@@ -10,7 +10,6 @@ from pathlib import Path
 
 MANAGED_COMMAND_FILES = (
     "exec.md",
-    "list-iters.md",
     "plan.md",
     "post.md",
     "spec.md",
@@ -18,6 +17,7 @@ MANAGED_COMMAND_FILES = (
 
 OBSOLETE_COMMAND_FILES = (
     "agentsmd.md",
+    "list-iters.md",
 )
 
 MANAGED_TEMPLATE_FILES = (
