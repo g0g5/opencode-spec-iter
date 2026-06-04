@@ -70,6 +70,8 @@ When the first two steps are complete and you decide to implement, run `/exec 1`
 
 This step also requires no human intervention and can be resumed after termination. After execution, the iteration is at the `executed` stage. Check what was implemented and whether it meets your goal.
 
+After the first iteration has executed, it is usually a good time to create a proper `AGENTS.md` for the project so future agent work has clear project-specific guidance.
+
 ### 4. `/post`
 
 Run `/post 1` to complete the iteration. Today this mainly performs a document review and creates a git commit. Verification features are planned.
@@ -82,6 +84,11 @@ After this step, the iteration stage changes to `completed`.
 - uv
 - Python 3.9+
 - Git
+
+Recommended extensions:
+
+- [agents-md-skill](https://github.com/g0g5/agents-md-skill) for creating and maintaining project `AGENTS.md` guidance. The previous `/agentsmd` workflow has moved to this separate agent skill project.
+- [opencode-websearch](https://github.com/emilsvennesson/opencode-websearch), an OpenCode-native web search plugin that uses your provider's internal web search tool. It supports providers such as OpenAI via API or ChatGPT subscription, Moonshot.ai via Kimi API or coding plan, GitHub Copilot, and others. Otherwise, configure at least one valid web search method, such as DuckDuckGo MCP, Tavily, or another provider.
 
 ## License
 
