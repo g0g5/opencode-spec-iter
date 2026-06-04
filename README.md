@@ -44,62 +44,37 @@ spec-iter init path/to/project
 - run `git init` when the project is not already a git repo
 - remove legacy managed helper scripts from `.opencode/scripts/` when safe
 
-## CLI Commands
-
-These commands work from the project root or any subdirectory inside an initialized project.
-
-```bash
-spec-iter new add-search
-spec-iter list
-spec-iter update 1 specified
-spec-iter prompt 1 plan
-spec-iter prompt 1 exec
-spec-iter prompt 1 post
-spec-iter prompt spec
-```
-
-## OpenCode Commands
-
-After `spec-iter init`, OpenCode can load these bundled templates from `.opencode/commands/`:
-
-| Command | Description |
-|---------|-------------|
-| `/spec <feature-idea>` | Create a specification document for a new iteration |
-| `/plan <iteration-id>` | Generate an implementation plan from `SPEC.md` |
-| `/exec <iteration-id>` | Execute the implementation plan from `PLAN.md` |
-| `/post <iteration-id>` | Run post-implementation tasks and completion flow |
-| `/list-iters` | Show iteration ids and stages |
-
-The bundled markdown templates now shell out to `spec-iter`, not project-local Python helper scripts.
-
-The previous `/agentsmd` command has moved out of Spec Iter. Use the separate [agents-md skill project](https://github.com/g0g5/agents-md-skill) for creating or updating `AGENTS.md` project context.
-
 ## Workflow
 
-1. Run `/spec <idea>` and the agent creates an iteration with `spec-iter new <iteration-name>`.
-2. The agent writes `.speciter/iterations/<iteration-name>/SPEC.md` and updates the stage with `spec-iter update 1 specified`.
-3. Run `/plan 1` and the template inserts `spec-iter prompt 1 plan` output.
-4. Run `/exec 1` and the template inserts `spec-iter prompt 1 exec` output.
-5. Run `/post 1` and the template inserts `spec-iter prompt 1 post` output.
+After `spec-iter init`, use these commands inside OpenCode.
 
-Iteration ids are positional and 1-based. `1` always means the most recently updated iteration.
+### 1. `/spec`
 
-## Project Structure
+Usually the first step is to switch OpenCode to Plan mode by pressing `Tab`. Discuss what you want to build with the agent, do any needed research, and clarify the idea before creating files.
 
-```text
-spec-iter/
-|- spec_iter/
-|  |- cli.py                  # argparse entrypoint and command dispatch
-|  |- init.py                 # project initialization and managed file installation
-|  |- iterations.py           # iteration CRUD-style logic and path helpers
-|  |- project.py              # project-root discovery and path formatting
-|  |- prompts.py              # prompt generation for command and subagent workflows
-|  |- command_prompts/        # packaged prompt templates for top-level OpenCode commands
-|  |- subagent_prompts/       # packaged prompt templates for delegated subagent tasks
-|  \- commands/               # Markdown command templates copied to projects
-|- pyproject.toml             # packaging and console script config
-\- install.py                # backward-compatible wrapper for `spec-iter init`
-```
+When you are confident enough, switch back to Build mode and run `/spec` with no parameters. The agent will start creating `SPEC.md`. You can also run `/spec <your idea>` to jump directly into the specification process.
+
+You may be asked a few questions while the specification is being written. After `SPEC.md` is created, the iteration is at the `specified` stage. Review or edit `SPEC.md` however you like before moving on.
+
+### 2. `/plan`
+
+When `SPEC.md` is ready, run `/plan 1`. The agent will create `PLAN.md` from `SPEC.md`.
+
+This step requires no human intervention. After `PLAN.md` is created, the iteration is at the `planned` stage.
+
+The number `1` points to the most recently created or updated iteration. Run `spec-iter list` in your terminal to check iteration order.
+
+### 3. `/exec`
+
+When the first two steps are complete and you decide to implement, run `/exec 1`. The agent will execute the implementation plan.
+
+This step also requires no human intervention and can be resumed after termination. After execution, the iteration is at the `executed` stage. Check what was implemented and whether it meets your goal.
+
+### 4. `/post`
+
+Run `/post 1` to complete the iteration. Today this mainly performs a document review and creates a git commit. Verification features are planned.
+
+After this step, the iteration stage changes to `completed`.
 
 ## Requirements
 
