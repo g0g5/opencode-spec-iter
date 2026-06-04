@@ -36,6 +36,8 @@ External libraries, researched docs, and links to `.speciter/docs/...`.
 
 Tests, compile/typecheck commands, manual checks, or example commands to run.
 
-## Risks And Open Questions
+## Shifts
 
-Known uncertainties that may affect planning or implementation.
+Changes to this SPEC that arise while completing the iteration, such as requirement, scope, acceptance criteria, behavior, dependency, or verification changes.
+
+Default: `N/A`

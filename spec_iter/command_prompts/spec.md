@@ -1,5 +1,7 @@
 Based on above user idea, follow this workflow strictly:
 
+0. Read `.speciter/templates/SPEC.md` and treat it as the required template for all following steps.
+
 1. Gather requirements with the `question` tool.
    - The first question must be: `Iteration name`.
    - Suggest a kebab-case default iteration name derived from the user idea.
@@ -21,7 +23,6 @@ Based on above user idea, follow this workflow strictly:
    - Read the research reports in .speciter/docs/
 
 5. Create the SPEC document.
-   - Read `.speciter/templates/SPEC.md` and use it as the required template.
    - Fill every template section with concise but actionable content based on the gathered QAs, workspace exploration, and research reports.
    - Keep sections that are not applicable and write `N/A` with a brief reason instead of deleting them.
    - Save it to: `.speciter/iterations/<iteration-name>/SPEC.md`,
