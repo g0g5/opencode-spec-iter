@@ -20,7 +20,7 @@ Based on above user idea, follow this workflow strictly:
    - Delegate research to `@general` agents, one agent per library.
    - Use this exact delegation prompt template:
      - `{{research_prompt}}`
-   - Read the research reports in .speciter/docs/
+   - Read the newly created research reports in .speciter/docs/
 
 5. Create the SPEC document.
    - Fill every template section with concise but actionable content based on the gathered QAs, workspace exploration, and research reports.
