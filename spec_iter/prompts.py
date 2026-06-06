@@ -124,6 +124,7 @@ def generate_post_prompt(project_root: Path, iter_id: str) -> str:
             "git_status": git_status,
             "git_diff": git_diff,
             "finished_path": display_path(iteration_path / "FINISHED.md"),
+            "iter_id": iter_id,
         },
     )
 
