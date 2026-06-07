@@ -18,6 +18,7 @@ from spec_iter.project import (
 from spec_iter.prompts import (
     PromptError,
     generate_exec_prompt,
+    generate_iter_prompt,
     generate_spec_prompt,
     generate_plan_prompt,
     generate_post_prompt,
@@ -86,10 +87,12 @@ def _handle_prompt(args: argparse.Namespace) -> int:
         return 0
 
     if args.kind is None:
-        raise PromptError("Prompt kind is required: plan, exec, or post")
+        raise PromptError("Prompt kind is required: plan, iter, exec, or post")
 
     if args.kind == "plan":
         prompt = generate_plan_prompt(project_root, args.target)
+    elif args.kind == "iter":
+        prompt = generate_iter_prompt(project_root, args.target)
     elif args.kind == "exec":
         prompt = generate_exec_prompt(project_root, args.target)
     elif args.kind == "post":
@@ -141,16 +144,16 @@ def build_parser() -> argparse.ArgumentParser:
     list_parser.set_defaults(handler=_handle_list)
 
     update_parser = subparsers.add_parser("update", help="Update an iteration stage")
-    update_parser.add_argument("iter_id", help="Iteration ID (1 = most recent)")
+    update_parser.add_argument("iter_id", help="Iteration ID or name (1 = most recent)")
     update_parser.add_argument(
         "stage", choices=IterManager.VALID_STAGES, help="New stage"
     )
     update_parser.set_defaults(handler=_handle_update)
 
     prompt_parser = subparsers.add_parser("prompt", help="Generate a prompt")
-    prompt_parser.add_argument("target", help="Iteration ID or 'spec'")
+    prompt_parser.add_argument("target", help="Iteration ID/name or 'spec'")
     prompt_parser.add_argument(
-        "kind", nargs="?", choices=["plan", "exec", "post"], help="Prompt kind"
+        "kind", nargs="?", choices=["plan", "iter", "exec", "post"], help="Prompt kind"
     )
     prompt_parser.set_defaults(handler=_handle_prompt)
 

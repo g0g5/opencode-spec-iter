@@ -61,8 +61,9 @@ def _git_output(project_root: Path, *args: str) -> str:
 
 def generate_plan_prompt(project_root: Path, iter_id: str) -> str:
     manager = IterManager(project_root)
-    spec_path = manager.get_spec_path(iter_id)
-    iteration_path = manager.get_iteration_path(iter_id)
+    resolved_id = manager.resolve_iteration_id(iter_id)
+    iteration_path = manager.iterations_dir / resolved_id
+    spec_path = iteration_path / "SPEC.md"
 
     if not spec_path.exists():
         raise PromptError(
@@ -75,15 +76,17 @@ def generate_plan_prompt(project_root: Path, iter_id: str) -> str:
         {
             "spec_path": display_path(spec_path),
             "plan_path": display_path(iteration_path / "PLAN.md"),
-            "iter_id": iter_id,
+            "iter_id": resolved_id,
         },
     )
 
 
 def generate_exec_prompt(project_root: Path, iter_id: str) -> str:
     manager = IterManager(project_root)
-    plan_path = manager.get_plan_path(iter_id)
-    spec_path = manager.get_spec_path(iter_id)
+    resolved_id = manager.resolve_iteration_id(iter_id)
+    iteration_path = manager.iterations_dir / resolved_id
+    plan_path = iteration_path / "PLAN.md"
+    spec_path = iteration_path / "SPEC.md"
 
     if not plan_path.exists():
         raise PromptError(
@@ -104,7 +107,48 @@ def generate_exec_prompt(project_root: Path, iter_id: str) -> str:
         {
             "plan_path": display_path(plan_path),
             "spec_path": display_path(spec_path),
-            "iter_id": iter_id,
+            "iter_id": resolved_id,
+            "exec_phase_prompt": exec_phase_prompt,
+        },
+    )
+
+
+def generate_iter_prompt(project_root: Path, iter_id: str) -> str:
+    manager = IterManager(project_root)
+    resolved_id = manager.resolve_iteration_id(iter_id)
+    iteration_path = manager.iterations_dir / resolved_id
+    spec_path = iteration_path / "SPEC.md"
+    plan_path = iteration_path / "PLAN.md"
+
+    if not spec_path.exists():
+        raise PromptError(
+            f"SPEC.md not found at {display_path(spec_path, project_root)}. "
+            f"Check path with `spec-iter path {iter_id} spec`, then tell the user to run `/spec` to create SPEC.md first."
+        )
+
+    create_plan_prompt = _render_template(
+        _load_subagent_prompt("create-plan.md"),
+        {
+            "plan_path": display_path(plan_path),
+            "spec_path": display_path(spec_path),
+            "iter_id": resolved_id,
+        },
+    )
+    exec_phase_prompt = _render_template(
+        _load_subagent_prompt("exec-phase.md"),
+        {
+            "plan_path": display_path(plan_path),
+            "spec_path": display_path(spec_path),
+        },
+    )
+
+    return _render_template(
+        _load_command_prompt("iter.md"),
+        {
+            "plan_path": display_path(plan_path),
+            "spec_path": display_path(spec_path),
+            "iter_id": resolved_id,
+            "create_plan_prompt": create_plan_prompt,
             "exec_phase_prompt": exec_phase_prompt,
         },
     )
@@ -112,8 +156,9 @@ def generate_exec_prompt(project_root: Path, iter_id: str) -> str:
 
 def generate_post_prompt(project_root: Path, iter_id: str) -> str:
     manager = IterManager(project_root)
-    iteration_path = manager.get_iteration_path(iter_id)
-    spec_path = manager.get_spec_path(iter_id)
+    resolved_id = manager.resolve_iteration_id(iter_id)
+    iteration_path = manager.iterations_dir / resolved_id
+    spec_path = iteration_path / "SPEC.md"
     git_status = _git_output(project_root, "status", "--short")
     git_diff = _git_output(project_root, "diff", "--stat")
 
@@ -124,7 +169,7 @@ def generate_post_prompt(project_root: Path, iter_id: str) -> str:
             "git_status": git_status,
             "git_diff": git_diff,
             "finished_path": display_path(iteration_path / "FINISHED.md"),
-            "iter_id": iter_id,
+            "iter_id": resolved_id,
         },
     )
 

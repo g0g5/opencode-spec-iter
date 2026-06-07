@@ -10,6 +10,7 @@ from pathlib import Path
 
 MANAGED_COMMAND_FILES = (
     "exec.md",
+    "iter.md",
     "plan.md",
     "post.md",
     "spec.md",
@@ -28,6 +29,7 @@ OBSOLETE_COMMAND_FILES = (
 
 MANAGED_TEMPLATE_FILES = (
     "SPEC.md",
+    "PLAN.md",
 )
 
 LEGACY_SCRIPT_FILES = {

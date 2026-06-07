@@ -52,8 +52,10 @@ class IterManager:
         try:
             numeric_id = int(iter_id)
         except ValueError as exc:
+            if any(item["name"] == iter_id for item in iterations):
+                return iter_id
             raise ValueError(
-                f"Invalid iteration ID '{iter_id}': must be a number >= 1"
+                f"Invalid iteration ID '{iter_id}': must be a number >= 1 or an existing iteration name"
             ) from exc
 
         if numeric_id < 1:
