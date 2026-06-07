@@ -17,7 +17,7 @@ Based on above user idea, follow this workflow strictly:
    - List the key libraries that are likely required.
    - Review these existing docs in .speciter/docs/ first to understand what has already been researched. 
    - Focus new research only on libraries, APIs, or patterns not yet covered.
-   - Delegate research to `@general` agents, one agent per library.
+   - Delegate research to `@web-researcher` agents, one agent per library.
    - Use this exact delegation prompt template:
      - `{{research_prompt}}`
    - Read the newly created research reports in .speciter/docs/

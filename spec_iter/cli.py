@@ -33,6 +33,7 @@ def _handle_init(args: argparse.Namespace) -> int:
     result = initialize_project(Path(args.path))
     print(f"Initialized Spec Iter in {display_path(result.project_root)}")
     print(f"Managed commands: {display_path(result.commands_dir)}")
+    print(f"Managed agents: {display_path(result.agents_dir)}")
 
     if result.removed_legacy_scripts:
         legacy_scripts_dir = (

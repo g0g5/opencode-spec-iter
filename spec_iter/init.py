@@ -15,6 +15,12 @@ MANAGED_COMMAND_FILES = (
     "spec.md",
 )
 
+MANAGED_AGENT_FILES = (
+    "phase-executor.md",
+    "plan-creator.md",
+    "web-researcher.md",
+)
+
 OBSOLETE_COMMAND_FILES = (
     "agentsmd.md",
     "list-iters.md",
@@ -37,6 +43,7 @@ LEGACY_SCRIPT_FILES = {
 class InitResult:
     project_root: Path
     commands_dir: Path
+    agents_dir: Path
     removed_legacy_scripts: bool = False
     legacy_scripts_dir: Path | None = None
     warnings: list[str] = field(default_factory=list)
@@ -44,6 +51,10 @@ class InitResult:
 
 def _bundled_commands_dir() -> Path:
     return Path(__file__).resolve().parent / "commands"
+
+
+def _bundled_agents_dir() -> Path:
+    return Path(__file__).resolve().parent / "agents"
 
 
 def _bundled_templates_dir() -> Path:
@@ -76,6 +87,17 @@ def _install_managed_commands(project_root: Path) -> Path:
         shutil.copyfile(source_dir / filename, commands_dir / filename)
 
     return commands_dir
+
+
+def _install_managed_agents(project_root: Path) -> Path:
+    source_dir = _bundled_agents_dir()
+    agents_dir = project_root / ".opencode" / "agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+
+    for filename in MANAGED_AGENT_FILES:
+        shutil.copyfile(source_dir / filename, agents_dir / filename)
+
+    return agents_dir
 
 
 def _cleanup_obsolete_commands(project_root: Path) -> None:
@@ -162,10 +184,11 @@ def initialize_project(target_path: Path) -> InitResult:
     _ensure_speciter_state(project_root)
     _install_managed_templates(project_root)
     commands_dir = _install_managed_commands(project_root)
+    agents_dir = _install_managed_agents(project_root)
     _cleanup_obsolete_commands(project_root)
     _append_gitignore_entries(
         project_root / ".gitignore",
-        [".opencode/commands/"],
+        [".opencode/commands/", ".opencode/agents/"],
     )
     removed_legacy_scripts, legacy_scripts_dir = _cleanup_legacy_scripts(
         project_root,
@@ -176,6 +199,7 @@ def initialize_project(target_path: Path) -> InitResult:
     return InitResult(
         project_root=project_root,
         commands_dir=commands_dir,
+        agents_dir=agents_dir,
         removed_legacy_scripts=removed_legacy_scripts,
         legacy_scripts_dir=legacy_scripts_dir,
         warnings=warnings,

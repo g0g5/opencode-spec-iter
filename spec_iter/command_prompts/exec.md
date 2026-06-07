@@ -5,13 +5,13 @@ Follow this workflow strictly:
 
 1. Read `{{plan_path}}` to understand the implementation plan. Create and maintain a todo list for all plan phases.
 
-2. Delegate exactly one implementation phase at a time to one `@general` agent.
+2. Delegate exactly one implementation phase at a time to one `@phase-executor` agent.
    - Never run multiple implementation agents in parallel; this avoids edit conflicts.
 
-3. For each delegated phase, send this exact instruction to the `@general` agent:
+3. For each delegated phase, send this exact instruction to the `@phase-executor` agent:
    - `{{exec_phase_prompt}}`
 
-4. When a phase is finished, delegate the next phase to a new `@general` agent.
+4. When a phase is finished, delegate the next phase to a new `@phase-executor` agent.
 
 5. After all phases are complete, report what was done to the user.
 

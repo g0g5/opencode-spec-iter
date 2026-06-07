@@ -1,0 +1,1 @@
+Create the PLAN.md based on `{{spec_path}}`, save as `{{plan_path}}`.
