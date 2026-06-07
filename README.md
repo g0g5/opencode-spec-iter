@@ -90,7 +90,18 @@ This step also requires no human intervention and can be resumed after terminati
 
 After the first iteration has executed, it is usually a good time to create a proper `AGENTS.md` for the project so future agent work has clear project-specific guidance.
 
-### 4. `/post`
+### 4. `/iter`
+
+`/iter` is an experimental command that combines planning and execution into one workflow. When `SPEC.md` is ready, run `/iter 1` to have the agent create `PLAN.md` and then execute it phase by phase.
+
+In this process the agent would:
+    - delegate PLAN.md creation to one `@plan-creator` subagent
+    - delegate each phase implementation to one `@phase-executor` subagent, one-by-one
+    - Run command `spec-iter update {{iter_id}} executed`
+
+This command is intended for lower-friction iteration, but `/plan` and `/exec` remain the recommended stable workflow when you want to review the plan before implementation.
+
+### 5. `/post`
 
 Run `/post 1` to complete the iteration. Today this mainly performs a document review and creates a git commit. Verification features are planned.
 
