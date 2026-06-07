@@ -55,11 +55,12 @@ Usually the first step is to switch OpenCode to Plan mode by pressing `Tab`. Dis
 When you are confident enough, switch back to Build mode and run `/spec` with no parameters. The agent will start creating `SPEC.md`. You can also run `/spec <your idea>` to jump directly into the specification process.
 
 In this process the agent would:
-    - Starting with ask you questions for clarifying specification details
-    - Run command `spec-iter new <iteration-name>`, which creates a new iteration
-    - Inspect and understand the current workspace situation using an `@explore` subagent
-    - Identify external library dependencies, do parallel web research with subagents
-    - Create the `SPEC.md` document.
+
+- Start by asking you questions to clarify specification details
+- Run command `spec-iter new <iteration-name>`, which creates a new iteration
+- Inspect and understand the current workspace situation using an `@explore` subagent
+- Identify external library dependencies and do parallel web research with subagents
+- Create the `SPEC.md` document.
 
 After `SPEC.md` is created, the iteration is at the `specified` stage. Review or edit `SPEC.md` however you like before moving on.
 
@@ -68,9 +69,10 @@ After `SPEC.md` is created, the iteration is at the `specified` stage. Review or
 When `SPEC.md` is ready, run `/plan 1`. The agent will create `PLAN.md` from `SPEC.md`.
 
 In this process the agent would:
-    - Read `SPEC.md` and create a phased implementation plan
-    - Save the plan as `PLAN.md`
-    - Run command `spec-iter update {{iter_id}} planned`
+
+- Read `SPEC.md` and create a phased implementation plan
+- Save the plan as `PLAN.md`
+- Run command `spec-iter update {{iter_id}} planned`
 
 This step requires no human intervention. After `PLAN.md` is created, the iteration is at the `planned` stage.
 
@@ -81,10 +83,11 @@ The number `1` points to the most recently created or updated iteration. Run `sp
 When the first two steps are complete and you decide to implement, run `/exec 1`. The agent will execute the implementation plan.
 
 In this process the agent would:
-    - main agent would create a todo list reflecting PLAN.md
-    - delegate each phase implementation to one subagent, one-by-one
-    - make sure they completed
-    - Run command `spec-iter update {{iter_id}} executed`
+
+- Create a todo list reflecting `PLAN.md`
+- Delegate each phase implementation to one subagent, one-by-one
+- Make sure each phase is completed
+- Run command `spec-iter update {{iter_id}} executed`
 
 This step also requires no human intervention and can be resumed after termination. After execution, the iteration is at the `executed` stage. Check what was implemented and whether it meets your goal.
 
@@ -95,9 +98,10 @@ After the first iteration has executed, it is usually a good time to create a pr
 `/iter` is an experimental command that combines planning and execution into one workflow. When `SPEC.md` is ready, run `/iter 1` to have the agent create `PLAN.md` and then execute it phase by phase.
 
 In this process the agent would:
-    - delegate PLAN.md creation to one `@plan-creator` subagent
-    - delegate each phase implementation to one `@phase-executor` subagent, one-by-one
-    - Run command `spec-iter update {{iter_id}} executed`
+
+- Delegate `PLAN.md` creation to one `@plan-creator` subagent
+- Delegate each phase implementation to one `@phase-executor` subagent, one-by-one
+- Run command `spec-iter update {{iter_id}} executed`
 
 This command is intended for lower-friction iteration, but `/plan` and `/exec` remain the recommended stable workflow when you want to review the plan before implementation.
 
